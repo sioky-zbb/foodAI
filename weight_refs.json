@@ -1,0 +1,1409 @@
+{
+  "count": 233,
+  "entries": [
+    {
+      "name": "芭蕉",
+      "weight_g": 95,
+      "label": "一个芭蕉",
+      "source": "ocr"
+    },
+    {
+      "name": "白吉馍",
+      "weight_g": 86,
+      "label": "一个白吉馍",
+      "source": "ocr"
+    },
+    {
+      "name": "白西柚",
+      "weight_g": 327,
+      "label": "一个白西柚",
+      "source": "ocr"
+    },
+    {
+      "name": "白粥",
+      "weight_g": 150,
+      "label": "白粥",
+      "source": "api"
+    },
+    {
+      "name": "百叶豆腐",
+      "weight_g": 10,
+      "label": "五块百叶豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "鲍鱼",
+      "weight_g": 80,
+      "label": "四个鲍鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "爆米花",
+      "weight_g": 50,
+      "label": "一盘爆米花",
+      "source": "ocr"
+    },
+    {
+      "name": "碧根果",
+      "weight_g": 50,
+      "label": "六个碧根果",
+      "source": "ocr"
+    },
+    {
+      "name": "菜包子",
+      "weight_g": 55,
+      "label": "菜包子",
+      "source": "api"
+    },
+    {
+      "name": "糙米饭",
+      "weight_g": 150,
+      "label": "一碗糙米饭",
+      "source": "ocr"
+    },
+    {
+      "name": "草鱼",
+      "weight_g": 160,
+      "label": "草鱼",
+      "source": "api"
+    },
+    {
+      "name": "茶肠",
+      "weight_g": 500,
+      "label": "一段茶肠",
+      "source": "ocr"
+    },
+    {
+      "name": "柴鱼",
+      "weight_g": 5,
+      "label": "一把柴鱼片",
+      "source": "ocr"
+    },
+    {
+      "name": "鲳鱼",
+      "weight_g": 40,
+      "label": "一条鲳鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "炒面",
+      "weight_g": 150,
+      "label": "一盘炒面",
+      "source": "ocr"
+    },
+    {
+      "name": "炒螃蟹",
+      "weight_g": 110,
+      "label": "炒螃蟹",
+      "source": "api"
+    },
+    {
+      "name": "车厘子",
+      "weight_g": 80,
+      "label": "五颗车厘子",
+      "source": "ocr"
+    },
+    {
+      "name": "陈醋",
+      "weight_g": 5,
+      "label": "一碟陈醋",
+      "source": "ocr"
+    },
+    {
+      "name": "陈皮",
+      "weight_g": 20,
+      "label": "一把陈皮",
+      "source": "ocr"
+    },
+    {
+      "name": "翅腿",
+      "weight_g": 15,
+      "label": "两只翅腿",
+      "source": "ocr"
+    },
+    {
+      "name": "丑柑",
+      "weight_g": 290,
+      "label": "一个丑柑",
+      "source": "ocr"
+    },
+    {
+      "name": "臭豆腐",
+      "weight_g": 50,
+      "label": "三块臭豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "打大张猪皮",
+      "weight_g": 100,
+      "label": "两打大张猪皮",
+      "source": "ocr"
+    },
+    {
+      "name": "大块鸡蛋仔",
+      "weight_g": 128,
+      "label": "一大块鸡蛋仔",
+      "source": "ocr"
+    },
+    {
+      "name": "大块奶皮子",
+      "weight_g": 30,
+      "label": "一大块奶皮子",
+      "source": "ocr"
+    },
+    {
+      "name": "带壳杏仁",
+      "weight_g": 20,
+      "label": "一把带壳杏仁",
+      "source": "ocr"
+    },
+    {
+      "name": "蛋黄酥",
+      "weight_g": 40,
+      "label": "一个蛋黄酥",
+      "source": "ocr"
+    },
+    {
+      "name": "德庆酥",
+      "weight_g": 60,
+      "label": "三块德庆酥",
+      "source": "ocr"
+    },
+    {
+      "name": "多宝鱼",
+      "weight_g": 476,
+      "label": "一条多宝鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "剁辣椒",
+      "weight_g": 30,
+      "label": "一碟剁辣椒",
+      "source": "ocr"
+    },
+    {
+      "name": "鹅蛋",
+      "weight_g": 150,
+      "label": "一个鹅蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "法饼",
+      "weight_g": 18.3,
+      "label": "荞麦法饼 净含量275克/15个",
+      "source": "user",
+      "per100": {
+        "calories_kcal": 383,
+        "protein_g": 7.9,
+        "carbs_g": 86.4,
+        "fat_g": 0
+      }
+    },
+    {
+      "name": "法棍",
+      "weight_g": 60,
+      "label": "一个法棍",
+      "source": "ocr"
+    },
+    {
+      "name": "丰水梨",
+      "weight_g": 300,
+      "label": "一个丰水梨",
+      "source": "ocr"
+    },
+    {
+      "name": "蜂蛹",
+      "weight_g": 30,
+      "label": "一盘蜂蛹",
+      "source": "ocr"
+    },
+    {
+      "name": "夫妻肺",
+      "weight_g": 85,
+      "label": "一盘夫妻肺片",
+      "source": "ocr"
+    },
+    {
+      "name": "干的豌豆",
+      "weight_g": 50,
+      "label": "一盘干的豌豆",
+      "source": "ocr"
+    },
+    {
+      "name": "干的竹荪",
+      "weight_g": 5,
+      "label": "一盘干的竹荪",
+      "source": "ocr"
+    },
+    {
+      "name": "干冬菇",
+      "weight_g": 20,
+      "label": "一把干冬菇",
+      "source": "ocr"
+    },
+    {
+      "name": "干海带",
+      "weight_g": 185,
+      "label": "一张干海带",
+      "source": "ocr"
+    },
+    {
+      "name": "干酪",
+      "weight_g": 25,
+      "label": "一盘干酪",
+      "source": "ocr"
+    },
+    {
+      "name": "干螺旋藻",
+      "weight_g": 50,
+      "label": "一盘干螺旋藻",
+      "source": "ocr"
+    },
+    {
+      "name": "干木耳",
+      "weight_g": 20,
+      "label": "一把干木耳",
+      "source": "ocr"
+    },
+    {
+      "name": "干银耳",
+      "weight_g": 35,
+      "label": "一盘干银耳",
+      "source": "ocr"
+    },
+    {
+      "name": "鸽子",
+      "weight_g": 320,
+      "label": "一只鸽子",
+      "source": "ocr"
+    },
+    {
+      "name": "鸽子蛋",
+      "weight_g": 40,
+      "label": "两个鸽子蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "关东煮",
+      "weight_g": 150,
+      "label": "一碗关东煮",
+      "source": "ocr"
+    },
+    {
+      "name": "广东香肠",
+      "weight_g": 80,
+      "label": "两根广东香肠",
+      "source": "ocr"
+    },
+    {
+      "name": "蚝油",
+      "weight_g": 43,
+      "label": "一碟蚝油",
+      "source": "ocr"
+    },
+    {
+      "name": "蚝油生菜",
+      "weight_g": 100,
+      "label": "一盘蚝油生菜",
+      "source": "ocr"
+    },
+    {
+      "name": "荷包蛋",
+      "weight_g": 35,
+      "label": "一个荷包蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "黑牛肝菌",
+      "weight_g": 180,
+      "label": "两朵黑牛肝菌",
+      "source": "ocr"
+    },
+    {
+      "name": "黑芝麻糊",
+      "weight_g": 40,
+      "label": "一盘黑芝麻糊粉",
+      "source": "ocr"
+    },
+    {
+      "name": "红腐乳",
+      "weight_g": 30,
+      "label": "两块红腐乳",
+      "source": "ocr"
+    },
+    {
+      "name": "红毛丹",
+      "weight_g": 28,
+      "label": "三颗红毛丹",
+      "source": "ocr"
+    },
+    {
+      "name": "红皮土豆",
+      "weight_g": 130,
+      "label": "一个红皮土豆",
+      "source": "ocr"
+    },
+    {
+      "name": "红薯",
+      "weight_g": 500,
+      "label": "红薯",
+      "source": "api"
+    },
+    {
+      "name": "红薯干",
+      "weight_g": 65,
+      "label": "五块红薯干",
+      "source": "ocr"
+    },
+    {
+      "name": "厚的瘦羊肉",
+      "weight_g": 200,
+      "label": "一块厚的瘦羊肉",
+      "source": "ocr"
+    },
+    {
+      "name": "厚的午餐肉",
+      "weight_g": 340,
+      "label": "四块厚的午餐肉",
+      "source": "ocr"
+    },
+    {
+      "name": "花椒",
+      "weight_g": 5,
+      "label": "一把花椒",
+      "source": "ocr"
+    },
+    {
+      "name": "花生",
+      "weight_g": 5,
+      "label": "一碟花生粉",
+      "source": "ocr"
+    },
+    {
+      "name": "花生酱",
+      "weight_g": 20,
+      "label": "一勺花生酱",
+      "source": "ocr"
+    },
+    {
+      "name": "花生牛轧糖",
+      "weight_g": 45,
+      "label": "六块花生牛轧糖",
+      "source": "ocr"
+    },
+    {
+      "name": "皇帝柑",
+      "weight_g": 20,
+      "label": "一个皇帝柑",
+      "source": "ocr"
+    },
+    {
+      "name": "黄花菜",
+      "weight_g": 30,
+      "label": "一盘黄花菜",
+      "source": "ocr"
+    },
+    {
+      "name": "黄鳝",
+      "weight_g": 60,
+      "label": "一条黄鳝",
+      "source": "ocr"
+    },
+    {
+      "name": "鸡蛋布丁",
+      "weight_g": 120,
+      "label": "一个鸡蛋布丁",
+      "source": "ocr"
+    },
+    {
+      "name": "鸡蛋糕",
+      "weight_g": 20,
+      "label": "一块鸡蛋糕",
+      "source": "ocr"
+    },
+    {
+      "name": "鸡米花",
+      "weight_g": 60,
+      "label": "一份鸡米花",
+      "source": "ocr"
+    },
+    {
+      "name": "鸡心",
+      "weight_g": 80,
+      "label": "八个鸡心",
+      "source": "ocr"
+    },
+    {
+      "name": "鸡胸肉",
+      "weight_g": 120,
+      "label": "鸡胸肉",
+      "source": "api"
+    },
+    {
+      "name": "即食鳕鱼肠",
+      "weight_g": 6,
+      "label": "一根即食鳕鱼肠",
+      "source": "ocr"
+    },
+    {
+      "name": "鲫鱼",
+      "weight_g": 200,
+      "label": "一条鲫鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "煎饼",
+      "weight_g": 95,
+      "label": "一个煎饼",
+      "source": "ocr"
+    },
+    {
+      "name": "酱油",
+      "weight_g": 20,
+      "label": "一碟酱油",
+      "source": "ocr"
+    },
+    {
+      "name": "芥菜头",
+      "weight_g": 700,
+      "label": "一个芥菜头",
+      "source": "ocr"
+    },
+    {
+      "name": "金华火腿",
+      "weight_g": 60,
+      "label": "三片金华火腿",
+      "source": "ocr"
+    },
+    {
+      "name": "蕨麻",
+      "weight_g": 50,
+      "label": "一盘蕨麻",
+      "source": "ocr"
+    },
+    {
+      "name": "军用压缩饼干",
+      "weight_g": 73,
+      "label": "两块军用压缩饼干",
+      "source": "ocr"
+    },
+    {
+      "name": "咖喱",
+      "weight_g": 15,
+      "label": "一块咖喱块",
+      "source": "ocr"
+    },
+    {
+      "name": "烤翅",
+      "weight_g": 50,
+      "label": "两个烤翅",
+      "source": "ocr"
+    },
+    {
+      "name": "烤鸡",
+      "weight_g": 600,
+      "label": "一只烤鸡",
+      "source": "ocr"
+    },
+    {
+      "name": "可乐",
+      "weight_g": 250,
+      "label": "一杯可乐",
+      "source": "ocr"
+    },
+    {
+      "name": "拉面",
+      "weight_g": 125,
+      "label": "一盘拉面",
+      "source": "ocr"
+    },
+    {
+      "name": "腊肉",
+      "weight_g": 250,
+      "label": "一块腊肉",
+      "source": "ocr"
+    },
+    {
+      "name": "辣椒油",
+      "weight_g": 17,
+      "label": "一碟辣椒油",
+      "source": "ocr"
+    },
+    {
+      "name": "醪糟",
+      "weight_g": 250,
+      "label": "一碗醪糟",
+      "source": "ocr"
+    },
+    {
+      "name": "炼猪油",
+      "weight_g": 25,
+      "label": "一碟炼猪油",
+      "source": "ocr"
+    },
+    {
+      "name": "鲈鱼",
+      "weight_g": 340,
+      "label": "一条鲈鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "卤豆腐",
+      "weight_g": 150,
+      "label": "一盘卤豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "卤牛筋",
+      "weight_g": 22,
+      "label": "两块卤牛筋",
+      "source": "ocr"
+    },
+    {
+      "name": "绿豆糕",
+      "weight_g": 50,
+      "label": "两块绿豆糕",
+      "source": "ocr"
+    },
+    {
+      "name": "罗勒",
+      "weight_g": 20,
+      "label": "一把罗勒",
+      "source": "ocr"
+    },
+    {
+      "name": "马蹄",
+      "weight_g": 150,
+      "label": "七颗马蹄",
+      "source": "ocr"
+    },
+    {
+      "name": "麦芽糖",
+      "weight_g": 7,
+      "label": "一碟麦芽糖",
+      "source": "ocr"
+    },
+    {
+      "name": "馒头",
+      "weight_g": 120,
+      "label": "馒头",
+      "source": "api"
+    },
+    {
+      "name": "蔓越莓饼干",
+      "weight_g": 45,
+      "label": "四块蔓越莓饼干",
+      "source": "ocr"
+    },
+    {
+      "name": "眉豆",
+      "weight_g": 50,
+      "label": "一盘眉豆",
+      "source": "ocr"
+    },
+    {
+      "name": "米饭",
+      "weight_g": 150,
+      "label": "米饭",
+      "source": "api"
+    },
+    {
+      "name": "棉花糖",
+      "weight_g": 20,
+      "label": "六个棉花糖",
+      "source": "ocr"
+    },
+    {
+      "name": "魔芋丝",
+      "weight_g": 60,
+      "label": "五个魔芋丝",
+      "source": "ocr"
+    },
+    {
+      "name": "墨西哥辣椒",
+      "weight_g": 50,
+      "label": "四只墨西哥辣椒",
+      "source": "ocr"
+    },
+    {
+      "name": "墨鱼",
+      "weight_g": 330,
+      "label": "一只墨鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "纳豆",
+      "weight_g": 40,
+      "label": "一把纳豆",
+      "source": "ocr"
+    },
+    {
+      "name": "奶豆腐",
+      "weight_g": 150,
+      "label": "一块奶豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "奶酪蛋糕切",
+      "weight_g": 50,
+      "label": "一块奶酪蛋糕切片",
+      "source": "ocr"
+    },
+    {
+      "name": "奶糖",
+      "weight_g": 25,
+      "label": "五颗奶糖",
+      "source": "ocr"
+    },
+    {
+      "name": "奶油泡芙",
+      "weight_g": 90,
+      "label": "一个奶油泡芙",
+      "source": "ocr"
+    },
+    {
+      "name": "年糕",
+      "weight_g": 50,
+      "label": "年糕",
+      "source": "api"
+    },
+    {
+      "name": "牛百叶",
+      "weight_g": 60,
+      "label": "一盘牛百叶",
+      "source": "ocr"
+    },
+    {
+      "name": "牛腩",
+      "weight_g": 300,
+      "label": "一块牛腩",
+      "source": "ocr"
+    },
+    {
+      "name": "牛肉",
+      "weight_g": 312,
+      "label": "牛肉",
+      "source": "api"
+    },
+    {
+      "name": "牛舌",
+      "weight_g": 80,
+      "label": "牛舌",
+      "source": "ocr"
+    },
+    {
+      "name": "牛蹄筋",
+      "weight_g": 30,
+      "label": "两块牛蹄筋",
+      "source": "ocr"
+    },
+    {
+      "name": "糯米团子",
+      "weight_g": 50,
+      "label": "两个糯米团子",
+      "source": "ocr"
+    },
+    {
+      "name": "泡椒鸡爪",
+      "weight_g": 120,
+      "label": "一盘泡椒鸡爪",
+      "source": "ocr"
+    },
+    {
+      "name": "啤酒",
+      "weight_g": 200,
+      "label": "一杯啤酒",
+      "source": "ocr"
+    },
+    {
+      "name": "平菇",
+      "weight_g": 150,
+      "label": "一盘平菇",
+      "source": "ocr"
+    },
+    {
+      "name": "苹果",
+      "weight_g": 260,
+      "label": "苹果",
+      "source": "api"
+    },
+    {
+      "name": "苹果脯",
+      "weight_g": 70,
+      "label": "一盘苹果脯",
+      "source": "ocr"
+    },
+    {
+      "name": "葡萄干",
+      "weight_g": 50,
+      "label": "一盘葡萄干",
+      "source": "ocr"
+    },
+    {
+      "name": "戚风蛋糕",
+      "weight_g": 30,
+      "label": "一块戚风蛋糕",
+      "source": "ocr"
+    },
+    {
+      "name": "千张",
+      "weight_g": 80,
+      "label": "两块千张",
+      "source": "ocr"
+    },
+    {
+      "name": "巧克力派",
+      "weight_g": 35,
+      "label": "一个巧克力派",
+      "source": "ocr"
+    },
+    {
+      "name": "青菜面",
+      "weight_g": 600,
+      "label": "一碗青菜面",
+      "source": "ocr"
+    },
+    {
+      "name": "青芒",
+      "weight_g": 700,
+      "label": "青芒",
+      "source": "ocr"
+    },
+    {
+      "name": "青苹果",
+      "weight_g": 60,
+      "label": "一个青苹果",
+      "source": "ocr"
+    },
+    {
+      "name": "球生菜",
+      "weight_g": 317,
+      "label": "一颗球生菜",
+      "source": "ocr"
+    },
+    {
+      "name": "去壳葵花子",
+      "weight_g": 25,
+      "label": "一盘去壳葵花子",
+      "source": "ocr"
+    },
+    {
+      "name": "去皮兔子",
+      "weight_g": 1293,
+      "label": "一只去皮兔子",
+      "source": "ocr"
+    },
+    {
+      "name": "全麦面",
+      "weight_g": 60,
+      "label": "一片全麦面包",
+      "source": "ocr"
+    },
+    {
+      "name": "日本豆腐",
+      "weight_g": 90,
+      "label": "一条日本豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "肉夹馍",
+      "weight_g": 150,
+      "label": "一个肉夹馍",
+      "source": "ocr"
+    },
+    {
+      "name": "三颗冰糖",
+      "weight_g": 25,
+      "label": "十三颗冰糖",
+      "source": "ocr"
+    },
+    {
+      "name": "三明治",
+      "weight_g": 35,
+      "label": "一个三明治",
+      "source": "ocr"
+    },
+    {
+      "name": "沙拉酱",
+      "weight_g": 5,
+      "label": "一勺沙拉酱",
+      "source": "ocr"
+    },
+    {
+      "name": "沙琪玛蛋酥",
+      "weight_g": 45,
+      "label": "两块沙琪玛蛋酥",
+      "source": "ocr"
+    },
+    {
+      "name": "山楂果丹皮",
+      "weight_g": 100,
+      "label": "四条山楂果丹皮",
+      "source": "ocr"
+    },
+    {
+      "name": "山竹",
+      "weight_g": 200,
+      "label": "两个山竹",
+      "source": "ocr"
+    },
+    {
+      "name": "烧麦",
+      "weight_g": 25,
+      "label": "一个烧麦",
+      "source": "ocr"
+    },
+    {
+      "name": "少糖少油的绿豆饼",
+      "weight_g": 45,
+      "label": "一个少糖少油的绿豆饼",
+      "source": "ocr"
+    },
+    {
+      "name": "蛇果",
+      "weight_g": 230,
+      "label": "一个蛇果",
+      "source": "ocr"
+    },
+    {
+      "name": "石斑鱼",
+      "weight_g": 600,
+      "label": "一条石斑鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "石榴",
+      "weight_g": 200,
+      "label": "一个石榴",
+      "source": "ocr"
+    },
+    {
+      "name": "食用仙人掌",
+      "weight_g": 235,
+      "label": "一片食用仙人掌",
+      "source": "ocr"
+    },
+    {
+      "name": "树莓",
+      "weight_g": 50,
+      "label": "一把树莓",
+      "source": "ocr"
+    },
+    {
+      "name": "水果奶油蛋糕",
+      "weight_g": 70,
+      "label": "一块水果奶油蛋糕",
+      "source": "ocr"
+    },
+    {
+      "name": "水浸的海参",
+      "weight_g": 50,
+      "label": "一个水浸的海参",
+      "source": "ocr"
+    },
+    {
+      "name": "水蜜桃",
+      "weight_g": 80,
+      "label": "一个水蜜桃",
+      "source": "ocr"
+    },
+    {
+      "name": "水煮蛋",
+      "weight_g": 50,
+      "label": "一个水煮蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "水煮鸡毛菜",
+      "weight_g": 100,
+      "label": "一盘水煮鸡毛菜",
+      "source": "ocr"
+    },
+    {
+      "name": "丝瓜",
+      "weight_g": 250,
+      "label": "一根丝瓜",
+      "source": "ocr"
+    },
+    {
+      "name": "松花蛋",
+      "weight_g": 55,
+      "label": "一个松花蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "素大肠",
+      "weight_g": 20,
+      "label": "六块素大肠",
+      "source": "ocr"
+    },
+    {
+      "name": "速溶西红柿鸡蛋汤的干料",
+      "weight_g": 12,
+      "label": "一碗速溶西红柿鸡蛋汤的干料",
+      "source": "ocr"
+    },
+    {
+      "name": "酸奶干",
+      "weight_g": 42,
+      "label": "六块酸奶干",
+      "source": "ocr"
+    },
+    {
+      "name": "糖粘子",
+      "weight_g": 40,
+      "label": "七个糖粘子",
+      "source": "ocr"
+    },
+    {
+      "name": "烫黑鱼",
+      "weight_g": 90,
+      "label": "一盘烫黑鱼片",
+      "source": "ocr"
+    },
+    {
+      "name": "桃的糖水罐头",
+      "weight_g": 350,
+      "label": "一杯桃的糖水罐头",
+      "source": "ocr"
+    },
+    {
+      "name": "提拉米苏",
+      "weight_g": 60,
+      "label": "一个提拉米苏",
+      "source": "ocr"
+    },
+    {
+      "name": "甜瓜",
+      "weight_g": 340,
+      "label": "一个甜瓜",
+      "source": "ocr"
+    },
+    {
+      "name": "甜椒",
+      "weight_g": 35,
+      "label": "一个甜椒",
+      "source": "ocr"
+    },
+    {
+      "name": "甜甜圈",
+      "weight_g": 66,
+      "label": "一个甜甜圈",
+      "source": "ocr"
+    },
+    {
+      "name": "铁观音茶叶",
+      "weight_g": 10,
+      "label": "一盘铁观音茶叶",
+      "source": "ocr"
+    },
+    {
+      "name": "图示为",
+      "weight_g": 145,
+      "label": "图示为",
+      "source": "ocr"
+    },
+    {
+      "name": "土豆",
+      "weight_g": 170,
+      "label": "土豆",
+      "source": "api"
+    },
+    {
+      "name": "土豆泥",
+      "weight_g": 80,
+      "label": "一碟土豆泥",
+      "source": "ocr"
+    },
+    {
+      "name": "脱水的百合",
+      "weight_g": 15,
+      "label": "一把脱水的百合",
+      "source": "ocr"
+    },
+    {
+      "name": "脱水的蕨菜",
+      "weight_g": 25,
+      "label": "一盘脱水的蕨菜",
+      "source": "ocr"
+    },
+    {
+      "name": "脱水的马铃薯丁",
+      "weight_g": 50,
+      "label": "一盘脱水的马铃薯丁",
+      "source": "ocr"
+    },
+    {
+      "name": "乌鸡",
+      "weight_g": 50,
+      "label": "六个乌鸡卷",
+      "source": "ocr"
+    },
+    {
+      "name": "乌鸡蛋",
+      "weight_g": 45,
+      "label": "一个乌鸡蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "无花果",
+      "weight_g": 8,
+      "label": "两个无花果",
+      "source": "ocr"
+    },
+    {
+      "name": "无花果干",
+      "weight_g": 25,
+      "label": "八颗无花果干",
+      "source": "ocr"
+    },
+    {
+      "name": "虾滑",
+      "weight_g": 30,
+      "label": "一勺虾滑",
+      "source": "ocr"
+    },
+    {
+      "name": "虾酱",
+      "weight_g": 15,
+      "label": "一碟虾酱",
+      "source": "ocr"
+    },
+    {
+      "name": "虾仁豆腐",
+      "weight_g": 150,
+      "label": "一盘虾仁豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "夏枯草",
+      "weight_g": 10,
+      "label": "一盘夏枯草",
+      "source": "ocr"
+    },
+    {
+      "name": "籼米粉",
+      "weight_g": 250,
+      "label": "籼米粉",
+      "source": "api"
+    },
+    {
+      "name": "鲜花饼",
+      "weight_g": 50,
+      "label": "一个鲜花饼",
+      "source": "ocr"
+    },
+    {
+      "name": "鲜贻贝",
+      "weight_g": 86,
+      "label": "两个鲜贻贝",
+      "source": "ocr"
+    },
+    {
+      "name": "咸鸭蛋",
+      "weight_g": 65,
+      "label": "一个咸鸭蛋",
+      "source": "ocr"
+    },
+    {
+      "name": "香菇蒸鸡翅",
+      "weight_g": 150,
+      "label": "一盘香菇蒸鸡翅",
+      "source": "ocr"
+    },
+    {
+      "name": "香蕉干",
+      "weight_g": 40,
+      "label": "一盘香蕉干",
+      "source": "ocr"
+    },
+    {
+      "name": "响铃",
+      "weight_g": 42,
+      "label": "三个响铃",
+      "source": "ocr"
+    },
+    {
+      "name": "小把枸杞",
+      "weight_g": 6,
+      "label": "一小把枸杞",
+      "source": "ocr"
+    },
+    {
+      "name": "小把开心果",
+      "weight_g": 25,
+      "label": "一小把开心果",
+      "source": "ocr"
+    },
+    {
+      "name": "小把奇亚籽",
+      "weight_g": 5,
+      "label": "一小把奇亚籽",
+      "source": "ocr"
+    },
+    {
+      "name": "小把水浸的地衣",
+      "weight_g": 20,
+      "label": "一小把水浸的地衣",
+      "source": "ocr"
+    },
+    {
+      "name": "小串巨峰葡萄",
+      "weight_g": 150,
+      "label": "一小串巨峰葡萄",
+      "source": "ocr"
+    },
+    {
+      "name": "小串青提",
+      "weight_g": 90,
+      "label": "一小串青提",
+      "source": "ocr"
+    },
+    {
+      "name": "小碟花生米",
+      "weight_g": 25,
+      "label": "一小碟花生米",
+      "source": "ocr"
+    },
+    {
+      "name": "小碟咖啡",
+      "weight_g": 20,
+      "label": "一小碟咖啡粉",
+      "source": "ocr"
+    },
+    {
+      "name": "小碟辣椒",
+      "weight_g": 5,
+      "label": "一小碟辣椒粉",
+      "source": "ocr"
+    },
+    {
+      "name": "小碟巧克力酱",
+      "weight_g": 20,
+      "label": "一小碟巧克力酱",
+      "source": "ocr"
+    },
+    {
+      "name": "小黄花鱼",
+      "weight_g": 130,
+      "label": "一条小黄花鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "小龙虾",
+      "weight_g": 30,
+      "label": "只小龙虾",
+      "source": "ocr"
+    },
+    {
+      "name": "小麦",
+      "weight_g": 50,
+      "label": "一盘小麦",
+      "source": "ocr"
+    },
+    {
+      "name": "小米",
+      "weight_g": 50,
+      "label": "一盘小米",
+      "source": "ocr"
+    },
+    {
+      "name": "小捧香叶",
+      "weight_g": 5,
+      "label": "一小捧香叶",
+      "source": "ocr"
+    },
+    {
+      "name": "小捧玉米",
+      "weight_g": 25,
+      "label": "一小捧玉米片",
+      "source": "ocr"
+    },
+    {
+      "name": "新疆馕饼",
+      "weight_g": 180,
+      "label": "一张新疆馕饼",
+      "source": "ocr"
+    },
+    {
+      "name": "匈牙利辣椒",
+      "weight_g": 100,
+      "label": "一个匈牙利辣椒",
+      "source": "ocr"
+    },
+    {
+      "name": "鳕鱼",
+      "weight_g": 150,
+      "label": "一块鳕鱼",
+      "source": "ocr"
+    },
+    {
+      "name": "鸭脖",
+      "weight_g": 60,
+      "label": "三块鸭脖",
+      "source": "ocr"
+    },
+    {
+      "name": "鸭肠",
+      "weight_g": 100,
+      "label": "一盘鸭肠",
+      "source": "ocr"
+    },
+    {
+      "name": "鸭翅",
+      "weight_g": 20,
+      "label": "三个鸭翅",
+      "source": "ocr"
+    },
+    {
+      "name": "鸭腿",
+      "weight_g": 250,
+      "label": "一只鸭腿",
+      "source": "ocr"
+    },
+    {
+      "name": "鸭胗",
+      "weight_g": 10,
+      "label": "四个鸭胗",
+      "source": "ocr"
+    },
+    {
+      "name": "燕麦片",
+      "weight_g": 20,
+      "label": "燕麦片",
+      "source": "api"
+    },
+    {
+      "name": "杨枝甘露",
+      "weight_g": 380,
+      "label": "一杯杨枝甘露",
+      "source": "ocr"
+    },
+    {
+      "name": "椰浆",
+      "weight_g": 10,
+      "label": "一碟椰浆",
+      "source": "ocr"
+    },
+    {
+      "name": "椰青",
+      "weight_g": 1150,
+      "label": "一个椰青",
+      "source": "ocr"
+    },
+    {
+      "name": "油豆腐",
+      "weight_g": 50,
+      "label": "一盘油豆腐",
+      "source": "ocr"
+    },
+    {
+      "name": "鱿鱼(鲜)",
+      "weight_g": 230,
+      "label": "鱿鱼(鲜)",
+      "source": "api"
+    },
+    {
+      "name": "鱼饼",
+      "weight_g": 85,
+      "label": "两块鱼饼",
+      "source": "ocr"
+    },
+    {
+      "name": "玉米窝窝头",
+      "weight_g": 115,
+      "label": "两个玉米窝窝头",
+      "source": "ocr"
+    },
+    {
+      "name": "芋头",
+      "weight_g": 160,
+      "label": "芋头",
+      "source": "api"
+    },
+    {
+      "name": "杂粮馒头",
+      "weight_g": 90,
+      "label": "一个杂粮馒头",
+      "source": "ocr"
+    },
+    {
+      "name": "枣泥糕",
+      "weight_g": 35,
+      "label": "两个枣泥糕",
+      "source": "ocr"
+    },
+    {
+      "name": "炸鸡腿",
+      "weight_g": 76,
+      "label": "一个炸鸡腿",
+      "source": "ocr"
+    },
+    {
+      "name": "珍珠奶茶",
+      "weight_g": 380,
+      "label": "一杯珍珠奶茶",
+      "source": "ocr"
+    },
+    {
+      "name": "猪耳朵",
+      "weight_g": 150,
+      "label": "一块猪耳朵",
+      "source": "ocr"
+    },
+    {
+      "name": "猪肝",
+      "weight_g": 165,
+      "label": "猪肝",
+      "source": "api"
+    },
+    {
+      "name": "猪脑",
+      "weight_g": 80,
+      "label": "一个猪脑",
+      "source": "ocr"
+    },
+    {
+      "name": "猪肉末",
+      "weight_g": 150,
+      "label": "猪肉末",
+      "source": "api"
+    },
+    {
+      "name": "猪肉脯",
+      "weight_g": 10,
+      "label": "两块猪肉脯",
+      "source": "ocr"
+    },
+    {
+      "name": "猪肉松",
+      "weight_g": 15,
+      "label": "一把猪肉松",
+      "source": "ocr"
+    },
+    {
+      "name": "猪腰子",
+      "weight_g": 150,
+      "label": "一个猪腰子",
+      "source": "ocr"
+    },
+    {
+      "name": "煮面条",
+      "weight_g": 150,
+      "label": "煮面条",
+      "source": "api"
+    },
+    {
+      "name": "紫米饭",
+      "weight_g": 150,
+      "label": "一盘紫米饭",
+      "source": "ocr"
+    },
+    {
+      "name": "粽子",
+      "weight_g": 60,
+      "label": "一个粽子",
+      "source": "ocr"
+    }
+  ]
+}

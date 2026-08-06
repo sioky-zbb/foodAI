@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="轻食Lens">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-180.png">
+  <link rel="stylesheet" href="./styles.css">
+  <title>轻食Lens · 减脂记录</title>
+</head>
+<body>
+  <header class="app-header">
+    <h1>轻食<span>Lens</span></h1>
+    <div class="date-nav">
+      <button id="prevDay" class="icon-btn" aria-label="前一天">‹</button>
+      <input type="date" id="dayPicker">
+      <button id="nextDay" class="icon-btn" aria-label="后一天">›</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- 今日 -->
+    <section id="view-today" class="view active">
+      <div class="card totals-card" id="todayTotals"></div>
+
+      <div class="card capture-card">
+        <label class="capture-label" for="photoInput">
+          <span class="camera-icon">📷</span>
+          <span id="captureHint">第一张：俯视图（可把工牌平放旁边）</span>
+        </label>
+        <input type="file" id="photoInput" accept="image/*" capture="environment" hidden>
+        <div id="photoPreviewWrap" class="photo-preview hidden">
+          <img id="photoPreview" alt="待分析图片">
+          <button id="clearPhoto" class="small-btn">✕ 清除</button>
+        </div>
+        <div id="photoPreviewWrap2" class="photo-preview hidden">
+          <img id="photoPreview2" alt="侧视角图片">
+          <button id="clearPhoto2" class="small-btn">✕ 清除</button>
+        </div>
+        <label class="capture-label secondary-capture" for="photoInput2">
+          <span class="camera-icon">📐</span>
+          <span id="captureHint2">＋第二视角（前上45°，工牌和食物都别动，可选）</span>
+        </label>
+        <input type="file" id="photoInput2" accept="image/*" capture="environment" hidden>
+        <div class="analyze-row">
+          <select id="mealType">
+            <option value="早餐">早餐</option>
+            <option value="午餐" selected>午餐</option>
+            <option value="晚餐">晚餐</option>
+            <option value="加餐">加餐</option>
+          </select>
+          <button id="analyzeBtn" class="primary-btn" disabled>AI 估重分析</button>
+        </div>
+        <div id="analyzeStatus" class="status"></div>
+      </div>
+
+      <div id="analysisResult" class="hidden"></div>
+      <div id="todayMeals"></div>
+
+      <div class="card ai-eval-card">
+        <h2>AI 饮食评价</h2>
+        <p class="muted">结合你的训练计划和当日饮食，让 DeepSeek 点评。</p>
+        <button id="evaluateBtn" class="secondary-btn">评价今日饮食</button>
+        <div id="evaluateResult" class="ai-output"></div>
+      </div>
+    </section>
+
+    <!-- 历史 -->
+    <section id="view-history" class="view">
+      <div class="card">
+        <h2>历史记录</h2>
+        <div id="historyList"></div>
+      </div>
+    </section>
+
+    <!-- 食物库 -->
+    <section id="view-foods" class="view">
+      <div class="card">
+        <h2>我的食物</h2>
+        <p class="muted">添加常吃的食物，可直接拍摄营养成分表自动识别（数值按每100克），并设置一份的重量，之后一键加到当日记录。</p>
+        <div id="foodList"></div>
+      </div>
+      <div class="card">
+        <h2>添加 / 编辑食物</h2>
+        <div class="form-grid">
+          <input type="text" id="foodName" placeholder="食物名称（必填）">
+          <input type="number" id="foodWeight" placeholder="一份重量 g（如 50）" step="1" min="1" inputmode="numeric">
+          <input type="number" id="foodKcal" placeholder="热量 kcal/100g" step="1" inputmode="decimal">
+          <input type="number" id="foodProtein" placeholder="蛋白质 g/100g" step="0.1" inputmode="decimal">
+          <input type="number" id="foodCarbs" placeholder="碳水 g/100g" step="0.1" inputmode="decimal">
+          <input type="number" id="foodFat" placeholder="脂肪 g/100g" step="0.1" inputmode="decimal">
+        </div>
+        <div class="btn-row">
+          <label class="small-btn" style="cursor:pointer">拍摄/上传营养成分表<input type="file" id="foodLabelInput" accept="image/*" capture="environment" hidden></label>
+          <button id="addFoodBtn" class="primary-btn">保存食物</button>
+        </div>
+        <div id="foodLabelPreview" class="food-label-preview hidden"></div>
+        <div id="foodFormStatus" class="status"></div>
+      </div>
+    </section>
+
+    <!-- 身体 -->
+    <section id="view-body" class="view">
+      <div class="card">
+        <h2>身体数据</h2>
+        <div class="form-grid">
+          <input type="date" id="bodyDate">
+          <input type="number" id="bodyWeight" placeholder="体重 kg" step="0.1" inputmode="decimal">
+          <input type="number" id="bodyChest" placeholder="胸围 cm" step="0.5" inputmode="decimal">
+          <input type="number" id="bodyWaist" placeholder="腰围 cm" step="0.5" inputmode="decimal">
+          <input type="number" id="bodyHip" placeholder="臀围 cm" step="0.5" inputmode="decimal">
+          <button id="saveBodyBtn" class="primary-btn">保存记录</button>
+        </div>
+        <canvas id="bodyChart" width="340" height="160"></canvas>
+        <div id="bodyList"></div>
+      </div>
+    </section>
+
+    <!-- 计划 -->
+    <section id="view-plan" class="view">
+      <div class="card">
+        <h2>训练计划</h2>
+        <p class="muted">粘贴你的训练计划（动作、容量、频率等），AI 评价饮食时会结合它。</p>
+        <textarea id="planText" rows="8" placeholder="例如：周一 胸+三头 …"></textarea>
+        <button id="savePlanBtn" class="primary-btn">保存计划</button>
+        <div id="planStatus" class="status"></div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section id="view-settings" class="view">
+      <div class="card">
+        <h2>API 配置</h2>
+        <p class="muted">密钥只保存在本机浏览器中，不会上传到任何服务器。</p>
+        <label>GLM 视觉 API Key（必填）<input type="password" id="glmKey" placeholder="智谱开放平台 Key"></label>
+        <label>GLM 模型<input type="text" id="glmModel" placeholder="glm-4.6v-flash"></label>
+        <label>DeepSeek API Key（可选，留空则用 GLM 分析）<input type="password" id="dsKey" placeholder="platform.deepseek.com Key"></label>
+        <label>DeepSeek 模型<input type="text" id="dsModel" placeholder="deepseek-v4-flash（推荐）或 deepseek-chat"></label>
+        <label>参照物（拍照时放食物旁做比例尺）
+          <select id="refType">
+            <option value="none">不使用</option>
+            <option value="idcard">身份证（8.5 × 5.4 cm）</option>
+            <option value="custom">自定义卡片（工牌等）</option>
+          </select>
+        </label>
+        <label>卡片本体长 cm（不含挂扣）<input type="number" id="refLen" step="0.1" min="1" max="40" placeholder="11.2"></label>
+        <label>卡片本体宽 cm（不含挂扣）<input type="number" id="refWid" step="0.1" min="1" max="40" placeholder="6.8"></label>
+        <div class="btn-row">
+          <button id="testGlmBtn" class="small-btn">测试 GLM</button>
+          <button id="testDsBtn" class="small-btn">测试 DeepSeek</button>
+        </div>
+        <div id="settingsStatus" class="status"></div>
+      </div>
+      <div class="card">
+        <h2>目标与个人信息</h2>
+        <div class="form-grid">
+          <input type="number" id="targetCal" placeholder="目标热量 kcal" inputmode="numeric">
+          <input type="number" id="targetProtein" placeholder="目标蛋白质 g" inputmode="numeric">
+          <input type="number" id="targetCarbs" placeholder="目标碳水 g" inputmode="numeric">
+          <input type="number" id="targetFat" placeholder="目标脂肪 g" inputmode="numeric">
+          <input type="number" id="userWeight" placeholder="当前体重 kg" step="0.1" inputmode="decimal">
+          <input type="number" id="userHeight" placeholder="身高 cm" inputmode="numeric">
+        </div>
+        <button id="saveSettingsBtn" class="primary-btn">保存设置</button>
+      </div>
+      <div class="card">
+        <h2>数据</h2>
+        <div class="btn-row">
+          <button id="exportBtn" class="small-btn">导出备份</button>
+          <button id="importBtn" class="small-btn">导入备份</button>
+          <input type="file" id="importFile" accept=".json" hidden>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tab-bar">
+    <button data-view="today" class="tab active">今日</button>
+    <button data-view="history" class="tab">历史</button>
+    <button data-view="foods" class="tab">食物库</button>
+    <button data-view="body" class="tab">身体</button>
+    <button data-view="plan" class="tab">计划</button>
+    <button data-view="settings" class="tab">设置</button>
+  </nav>
+
+  <script src="./app.js"></script>
+</body>
+</html>
