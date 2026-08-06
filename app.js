@@ -336,6 +336,40 @@ function visionPrompt() {
 const NUTRITION_PROMPT = `你是营养标签读取助手。请仔细阅读这张营养成分表图片，提取每100克（或每份）的能量/热量（kcal）、蛋白质（g）、碳水化合物（g）、脂肪（g）。如果表上标注的是"每份"数值，请同时识别每份重量（克），并换算成每100克的数值。只输出以下 JSON（不要输出其他文字）：
 {"serving_size_g": 0, "per100": {"calories_kcal": 0, "protein_g": 0, "carbs_g": 0, "fat_g": 0}}`;
 
+function normalizeFoodName(text) {
+  return String(text || '').toLowerCase().replace(/[\s（）()·\-_/\\,，。、]/g, '');
+}
+
+function foodMatchScore(query, candidate) {
+  const q = normalizeFoodName(query);
+  const c = normalizeFoodName(candidate);
+  if (!q || !c) return 0;
+  if (q === c) return 100;
+  if (c.includes(q) || q.includes(c)) return 85;
+  if (q.length < 2 || c.length < 2) return 0;
+  // 字符按序出现（模糊子序列）
+  let pos = 0;
+  let matched = 0;
+  for (const ch of q) {
+    const idx = c.indexOf(ch, pos);
+    if (idx === -1) break;
+    pos = idx + 1;
+    matched++;
+  }
+  if (matched === q.length) {
+    const ratio = q.length / c.length;
+    if (ratio >= 0.5) return Math.round(50 + ratio * 20);
+  }
+  // 字符集合重叠度
+  const qSet = new Set(q);
+  const cSet = new Set(c);
+  let overlap = 0;
+  qSet.forEach((ch) => { if (cSet.has(ch)) overlap++; });
+  const jac = overlap / Math.max(qSet.size, cSet.size);
+  if (jac >= 0.6) return Math.round(40 + jac * 30);
+  return 0;
+}
+
 function matchWeightRefs(foodNames) {
   const matches = [];
   const seen = new Set();
@@ -348,13 +382,22 @@ function matchWeightRefs(foodNames) {
   for (const name of foodNames) {
     const n = String(name || '').trim();
     if (!n) continue;
+    // 长文本（文字记录模式）只做包含匹配，避免误匹配
+    const isRawText = n.length > 16;
+    const scored = [];
     for (const ref of pool) {
       if (seen.has(ref.name)) continue;
-      if (ref.name === n || ref.name.includes(n) || n.includes(ref.name)) {
-        seen.add(ref.name);
-        matches.push(ref);
-        if (matches.length >= 8) break;
-      }
+      const score = isRawText
+        ? (ref.name.includes(n) || n.includes(ref.name) ? 85 : 0)
+        : foodMatchScore(n, ref.name);
+      if (score >= 45) scored.push({ ref, score });
+    }
+    scored.sort((a, b) => b.score - a.score);
+    for (const item of scored.slice(0, 3)) {
+      if (seen.has(item.ref.name)) continue;
+      seen.add(item.ref.name);
+      matches.push(item.ref);
+      if (matches.length >= 8) return matches;
     }
   }
   return matches;
@@ -916,9 +959,21 @@ function resetFoodForm() {
 }
 
 function renderCustomFoods() {
-  const list = allCustomFoods.slice().sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+  const query = $('#foodSearch') ? $('#foodSearch').value.trim() : '';
+  let list = allCustomFoods.slice();
+  if (query) {
+    list = list
+      .map((food) => ({ food, score: foodMatchScore(query, food.name) }))
+      .filter((item) => item.score >= 50)
+      .sort((a, b) => b.score - a.score || a.food.name.localeCompare(b.food.name, 'zh'))
+      .map((item) => item.food);
+  } else {
+    list.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+  }
   if (!list.length) {
-    $('#foodList').innerHTML = '<p class="muted">还没有自定义食物，在下方添加一个吧。</p>';
+    $('#foodList').innerHTML = allCustomFoods.length
+      ? '<p class="muted">没有匹配的食物，换个关键词试试。</p>'
+      : '<p class="muted">还没有自定义食物，在下方添加一个吧。</p>';
     return;
   }
   $('#foodList').innerHTML = list.map((food) => {
@@ -1450,6 +1505,7 @@ function bindEvents() {
   $('#refLen').addEventListener('input', updateRefHint);
   $('#refWid').addEventListener('input', updateRefHint);
   $('#addFoodBtn').addEventListener('click', saveFood);
+  $('#foodSearch').addEventListener('input', () => renderCustomFoods());
   $('#foodLabelInput').addEventListener('change', (event) => handleFoodLabelFile(event.target.files && event.target.files[0]));
   $('#foodLabelAlbumInput').addEventListener('change', (event) => handleFoodLabelFile(event.target.files && event.target.files[0]));
   $('#foodList').addEventListener('click', handleFoodListClick);
