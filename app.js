@@ -370,6 +370,23 @@ function foodMatchScore(query, candidate) {
   return 0;
 }
 
+function fuzzyInText(text, refName) {
+  const t = normalizeFoodName(text);
+  const c = normalizeFoodName(refName);
+  if (!t || !c) return 0;
+  if (t.includes(c)) return 85;
+  const len = c.length;
+  let best = 0;
+  const maxWin = Math.min(t.length, len + 2);
+  for (let win = Math.max(2, len - 2); win <= maxWin; win++) {
+    for (let i = 0; i + win <= t.length; i++) {
+      const score = foodMatchScore(t.slice(i, i + win), c);
+      if (score > best) best = score;
+    }
+  }
+  return best;
+}
+
 function matchWeightRefs(foodNames) {
   const matches = [];
   const seen = new Set();
@@ -382,13 +399,13 @@ function matchWeightRefs(foodNames) {
   for (const name of foodNames) {
     const n = String(name || '').trim();
     if (!n) continue;
-    // 长文本（文字记录模式）只做包含匹配，避免误匹配
+    // 长文本（文字记录模式）用窗口模糊匹配，避免整段误匹配
     const isRawText = n.length > 16;
     const scored = [];
     for (const ref of pool) {
       if (seen.has(ref.name)) continue;
       const score = isRawText
-        ? (ref.name.includes(n) || n.includes(ref.name) ? 85 : 0)
+        ? fuzzyInText(n, ref.name)
         : foodMatchScore(n, ref.name);
       if (score >= 45) scored.push({ ref, score });
     }
@@ -451,6 +468,7 @@ function textAnalyzerPrompt(text) {
   return `你是专业的减脂营养师。请根据用户的文字描述，识别每一种食物并估算重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出这一餐的总量。估算要保守，宁可低估也不要高估。weight_g 必须是可食部净重；如果描述里包含包装信息（如"一袋275克15个，吃了11个"），按 净含量÷总数×数量 计算。用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；今日（${dayLabel}）目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
 常见份量参考（来自薄荷估重参考库，仅作校准）：
 ${refLines || '（无匹配条目）'}
+如果描述中的食物与某个参考条目是同类食物（如 绿豆莲子粥 ≈ 牛乳绿豆莲子粥），优先采用参考条目的每份重量和每100克营养。
 如果某个食物没有任何参考条目，说明它不在参考库和用户食物库中，请用通用营养知识估算，并在 notes 中注明"通用知识估算，可能不准"。
 严格按以下 JSON 格式输出（不要输出其他文字）：
 {"foods":[{"name":"食物名称","weight_g":0,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0}],"totals":{"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0},"notes":"简要备注"}
@@ -645,6 +663,14 @@ function setTextStatus(text, kind) {
   node.textContent = text || '';
 }
 
+function detectMealTypeFromText(text) {
+  if (/早上|早餐|早饭|早晨/.test(text)) return '早餐';
+  if (/中午|午餐|午饭|中饭/.test(text)) return '午餐';
+  if (/晚上|晚餐|晚饭|傍晚/.test(text)) return '晚餐';
+  if (/加餐|下午茶|宵夜|夜宵/.test(text)) return '加餐';
+  return null;
+}
+
 async function runTextAnalysis() {
   const text = $('#textInput').value.trim();
   if (!text) {
@@ -655,6 +681,13 @@ async function runTextAnalysis() {
     setTextStatus('请先到「设置」配置 API Key。', 'error');
     return;
   }
+  const detected = detectMealTypeFromText(text);
+  if (detected) $('#textMealType').value = detected;
+  const mealHits = (text.match(/早上|早餐|早饭|早晨|中午|午餐|午饭|中饭|晚上|晚餐|晚饭|傍晚|加餐|下午茶|宵夜|夜宵/g) || []);
+  const mealSet = new Set(mealHits.map((hit) => detectMealTypeFromText(hit)));
+  const multiMealNotice = mealSet.size > 1
+    ? `（检测到多个餐次，已按「${$('#textMealType').value}」记录；多餐次请分开输入）`
+    : '';
   const button = $('#textAnalyzeBtn');
   button.disabled = true;
   setTextStatus('AI 正在识别文字并估重…', 'loading');
@@ -700,7 +733,7 @@ async function runTextAnalysis() {
       mealType: $('#textMealType').value
     };
     renderAnalysisResult();
-    setTextStatus('识别完成，请核对后记录 ✓', 'ok');
+    setTextStatus('识别完成' + multiMealNotice + '，请核对后记录 ✓', 'ok');
   } catch (error) {
     setTextStatus('识别失败：' + error.message, 'error');
   } finally {
