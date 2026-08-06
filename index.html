@@ -33,6 +33,9 @@
           <span id="captureHint">第一张：俯视图（可把工牌平放旁边）</span>
         </label>
         <input type="file" id="photoInput" accept="image/*" capture="environment" hidden>
+        <div class="btn-row">
+          <label class="small-btn" style="cursor:pointer">🖼 从相册选择第一张<input type="file" id="photoAlbumInput" accept="image/*" hidden></label>
+        </div>
         <div id="photoPreviewWrap" class="photo-preview hidden">
           <img id="photoPreview" alt="待分析图片">
           <button id="clearPhoto" class="small-btn">✕ 清除</button>
@@ -46,6 +49,9 @@
           <span id="captureHint2">＋第二视角（前上45°，工牌和食物都别动，可选）</span>
         </label>
         <input type="file" id="photoInput2" accept="image/*" capture="environment" hidden>
+        <div class="btn-row">
+          <label class="small-btn" style="cursor:pointer">🖼 从相册选择第二张<input type="file" id="photoAlbumInput2" accept="image/*" hidden></label>
+        </div>
         <div class="analyze-row">
           <select id="mealType">
             <option value="早餐">早餐</option>
@@ -96,6 +102,7 @@
         </div>
         <div class="btn-row">
           <label class="small-btn" style="cursor:pointer">拍摄/上传营养成分表<input type="file" id="foodLabelInput" accept="image/*" capture="environment" hidden></label>
+          <label class="small-btn" style="cursor:pointer">🖼 从相册选营养表<input type="file" id="foodLabelAlbumInput" accept="image/*" hidden></label>
           <button id="addFoodBtn" class="primary-btn">保存食物</button>
         </div>
         <div id="foodLabelPreview" class="food-label-preview hidden"></div>

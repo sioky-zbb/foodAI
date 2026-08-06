@@ -645,6 +645,8 @@ async function confirmSaveMeal() {
   pendingImageDataUrl2 = null;
   $('#photoInput').value = '';
   $('#photoInput2').value = '';
+  $('#photoAlbumInput').value = '';
+  $('#photoAlbumInput2').value = '';
   $('#photoPreviewWrap').classList.add('hidden');
   $('#photoPreviewWrap2').classList.add('hidden');
   $('#captureHint2').textContent = '＋第二视角（前上45°，工牌和食物都别动，可选）';
@@ -773,6 +775,7 @@ function resetFoodForm() {
   $('#foodCarbs').value = '';
   $('#foodFat').value = '';
   $('#foodLabelInput').value = '';
+  $('#foodLabelAlbumInput').value = '';
   $('#foodLabelPreview').classList.add('hidden');
   $('#foodLabelPreview').innerHTML = '';
   $('#addFoodBtn').textContent = '保存食物';
@@ -999,8 +1002,7 @@ function updateRefHint() {
   }
 }
 
-async function handleFoodLabelUpload(event) {
-  const file = event.target.files && event.target.files[0];
+async function handleFoodLabelFile(file) {
   if (!file) return;
   if (!settings.glmKey) {
     setFoodStatus('需要先配置 GLM API Key 才能识别营养成分表。', 'error');
@@ -1133,8 +1135,7 @@ function bindEvents() {
     refreshToday();
   });
 
-  $('#photoInput').addEventListener('change', async (event) => {
-    const file = event.target.files && event.target.files[0];
+  async function handleMainPhotoFile(file) {
     if (!file) return;
     try {
       pendingImageDataUrl = await fileToDataURL(file, 1280, 0.85);
@@ -1146,7 +1147,9 @@ function bindEvents() {
     } catch (error) {
       setStatus('#analyzeStatus', '图片读取失败：' + error.message, 'error');
     }
-  });
+  }
+  $('#photoInput').addEventListener('change', (event) => handleMainPhotoFile(event.target.files && event.target.files[0]));
+  $('#photoAlbumInput').addEventListener('change', (event) => handleMainPhotoFile(event.target.files && event.target.files[0]));
 
   $('#clearPhoto').addEventListener('click', () => {
     pendingImageDataUrl = null;
@@ -1154,6 +1157,8 @@ function bindEvents() {
     pendingResult = null;
     $('#photoInput').value = '';
     $('#photoInput2').value = '';
+    $('#photoAlbumInput').value = '';
+    $('#photoAlbumInput2').value = '';
     $('#photoPreviewWrap').classList.add('hidden');
     $('#photoPreviewWrap2').classList.add('hidden');
     $('#captureHint2').textContent = '＋第二视角（前上45°，工牌和食物都别动，可选）';
@@ -1163,8 +1168,7 @@ function bindEvents() {
     setStatus('#analyzeStatus', '', '');
   });
 
-  $('#photoInput2').addEventListener('change', async (event) => {
-    const file = event.target.files && event.target.files[0];
+  async function handleSidePhotoFile(file) {
     if (!file) return;
     try {
       pendingImageDataUrl2 = await fileToDataURL(file, 1280, 0.85);
@@ -1174,11 +1178,14 @@ function bindEvents() {
     } catch (error) {
       setStatus('#analyzeStatus', '第二视角图片读取失败：' + error.message, 'error');
     }
-  });
+  }
+  $('#photoInput2').addEventListener('change', (event) => handleSidePhotoFile(event.target.files && event.target.files[0]));
+  $('#photoAlbumInput2').addEventListener('change', (event) => handleSidePhotoFile(event.target.files && event.target.files[0]));
 
   $('#clearPhoto2').addEventListener('click', () => {
     pendingImageDataUrl2 = null;
     $('#photoInput2').value = '';
+    $('#photoAlbumInput2').value = '';
     $('#photoPreviewWrap2').classList.add('hidden');
     $('#captureHint2').textContent = '＋第二视角（前上45°，工牌和食物都别动，可选）';
   });
@@ -1251,7 +1258,8 @@ function bindEvents() {
   $('#refLen').addEventListener('input', updateRefHint);
   $('#refWid').addEventListener('input', updateRefHint);
   $('#addFoodBtn').addEventListener('click', saveFood);
-  $('#foodLabelInput').addEventListener('change', handleFoodLabelUpload);
+  $('#foodLabelInput').addEventListener('change', (event) => handleFoodLabelFile(event.target.files && event.target.files[0]));
+  $('#foodLabelAlbumInput').addEventListener('change', (event) => handleFoodLabelFile(event.target.files && event.target.files[0]));
   $('#foodList').addEventListener('click', handleFoodListClick);
 
   $('#exportBtn').addEventListener('click', exportData);
