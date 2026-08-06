@@ -712,7 +712,7 @@ async function runEvaluate() {
   try {
     const reply = await analyzerChat([
       { role: 'user', content: evaluatePrompt(summary, settings.plan) }
-    ], { maxTokens: 1200 });
+    ], { maxTokens: 1200, jsonMode: false });
     $('#evaluateResult').innerHTML = esc(reply);
   } catch (error) {
     $('#evaluateResult').innerHTML = '评价失败：' + esc(error.message);
