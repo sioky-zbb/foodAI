@@ -387,6 +387,27 @@ ${refLines || '（无匹配条目）'}
 ${visionText}`;
 }
 
+function textAnalyzerPrompt(text) {
+  const user = settings.user;
+  const targets = targetsForDate(currentDate);
+  const dayLabel = dayMetaForDate(currentDate).label;
+  const refLines = matchWeightRefs([text])
+    .map((ref) => {
+      const n = ref.per100;
+      if (n) return `- ${ref.name}：约${ref.weight_g}克/份，每100克约 ${n.calories_kcal}kcal / 蛋白${n.protein_g}g / 碳水${n.carbs_g}g / 脂肪${n.fat_g}g`;
+      return `- ${ref.name}：约${ref.weight_g}克/份`;
+    })
+    .join('\n');
+  return `你是专业的减脂营养师。请根据用户的文字描述，识别每一种食物并估算重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出这一餐的总量。估算要保守，宁可低估也不要高估。weight_g 必须是可食部净重；如果描述里包含包装信息（如"一袋275克15个，吃了11个"），按 净含量÷总数×数量 计算。用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；今日（${dayLabel}）目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
+常见份量参考（来自薄荷估重参考库，仅作校准）：
+${refLines || '（无匹配条目）'}
+严格按以下 JSON 格式输出（不要输出其他文字）：
+{"foods":[{"name":"食物名称","weight_g":0,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0}],"totals":{"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0},"notes":"简要备注"}
+
+用户描述：
+${text}`;
+}
+
 function evaluatePrompt(daySummary, planText) {
   const user = settings.user;
   const targets = targetsForDate(currentDate);
@@ -567,6 +588,75 @@ async function runAnalysis() {
   }
 }
 
+function setTextStatus(text, kind) {
+  const node = $('#textStatus');
+  node.className = 'status' + (kind ? ' ' + kind : '');
+  node.textContent = text || '';
+}
+
+async function runTextAnalysis() {
+  const text = $('#textInput').value.trim();
+  if (!text) {
+    setTextStatus('请先输入食物描述。', 'error');
+    return;
+  }
+  if (!settings.dsKey && !settings.glmKey) {
+    setTextStatus('请先到「设置」配置 API Key。', 'error');
+    return;
+  }
+  const button = $('#textAnalyzeBtn');
+  button.disabled = true;
+  setTextStatus('AI 正在识别文字并估重…', 'loading');
+  try {
+    let analysisText = null;
+    let parsed = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      analysisText = await analyzerChat([
+        { role: 'user', content: textAnalyzerPrompt(text) }
+      ]);
+      parsed = extractJson(analysisText);
+      if (parsed && Array.isArray(parsed.foods)) break;
+      if (attempt === 0) {
+        setTextStatus('输出格式异常，自动重试…', 'loading');
+        await sleep(1500);
+      }
+    }
+    if (!parsed || !Array.isArray(parsed.foods)) {
+      throw new Error('模型返回格式无法解析，请重试。原始内容：' + analysisText.slice(0, 200));
+    }
+    const foods = parsed.foods.map((food) => ({
+      name: String(food.name || '未命名'),
+      weight_g: round(food.weight_g),
+      calories_kcal: round(food.calories_kcal),
+      protein_g: round(food.protein_g),
+      carbs_g: round(food.carbs_g),
+      fat_g: round(food.fat_g),
+      package_info: null
+    }));
+    const totals = { calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+    foods.forEach((food) => {
+      totals.calories_kcal += food.calories_kcal;
+      totals.protein_g += food.protein_g;
+      totals.carbs_g += food.carbs_g;
+      totals.fat_g += food.fat_g;
+    });
+    pendingResult = {
+      foods,
+      totals,
+      notes: String(parsed.notes || ''),
+      visionRaw: '',
+      thumb: '',
+      mealType: $('#textMealType').value
+    };
+    renderAnalysisResult();
+    setTextStatus('识别完成，请核对后记录 ✓', 'ok');
+  } catch (error) {
+    setTextStatus('识别失败：' + error.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderAnalysisResult() {
   if (!pendingResult) return;
   const { foods, totals, notes } = pendingResult;
@@ -666,7 +756,7 @@ async function confirmSaveMeal() {
     id: uid(),
     date: currentDate,
     time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
-    mealType: $('#mealType').value,
+    mealType: pendingResult.mealType || $('#mealType').value,
     foods: pendingResult.foods,
     totals: pendingResult.totals,
     notes: pendingResult.notes,
@@ -1258,6 +1348,7 @@ function bindEvents() {
   });
 
   $('#analyzeBtn').addEventListener('click', runAnalysis);
+  $('#textAnalyzeBtn').addEventListener('click', runTextAnalysis);
   $('#evaluateBtn').addEventListener('click', runEvaluate);
 
   $('#todayMeals').addEventListener('click', async (event) => {

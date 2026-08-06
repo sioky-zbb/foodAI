@@ -64,6 +64,22 @@
         <div id="analyzeStatus" class="status"></div>
       </div>
 
+      <div class="card text-record-card">
+        <h2>文字记录</h2>
+        <p class="muted">输入自然语言描述，AI 自动识别食物并估重，如「早上喝了一杯牛奶，吃了一个鸡蛋，半碗米饭」。</p>
+        <textarea id="textInput" rows="3" placeholder="例如：中午吃了一碗米饭、一份卤鸭腿（去皮）、半盘清炒时蔬、一个卤蛋"></textarea>
+        <div class="analyze-row">
+          <select id="textMealType">
+            <option value="早餐">早餐</option>
+            <option value="午餐" selected>午餐</option>
+            <option value="晚餐">晚餐</option>
+            <option value="加餐">加餐</option>
+          </select>
+          <button id="textAnalyzeBtn" class="primary-btn">文字识别分析</button>
+        </div>
+        <div id="textStatus" class="status"></div>
+      </div>
+
       <div id="analysisResult" class="hidden"></div>
       <div id="todayMeals"></div>
 
