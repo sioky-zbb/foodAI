@@ -1008,19 +1008,39 @@ async function exportData() {
     plan: settings.plan,
     targets: settings.targets,
     user: settings.user,
+    refCard: settings.refCard,
+    glmModel: settings.glmModel,
+    dsModel: settings.dsModel,
     meals,
     body,
     customFoods,
     useWeekTargets: settings.useWeekTargets,
     weekTargets: settings.weekTargets
   };
+  const fileName = `foodlens-backup-${localDateString()}.json`;
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  // iOS PWA 里程序化下载经常无效，优先用系统分享面板（可存到“文件”、微信、AirDrop）
+  if (navigator.canShare && navigator.canShare({ files: [new File([blob], fileName, { type: 'application/json' })] })) {
+    try {
+      await navigator.share({
+        files: [new File([blob], fileName, { type: 'application/json' })],
+        title: '轻食Lens 备份'
+      });
+      setStatus('#settingsStatus', '备份已分享 ✓', 'ok');
+      return;
+    } catch (error) {
+      // 用户取消分享时继续走下载兜底
+    }
+  }
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `foodlens-backup-${localDateString()}.json`;
+  a.download = fileName;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
+  setStatus('#settingsStatus', '备份已导出 ✓（若未看到文件，请改用分享面板）', 'ok');
 }
 
 async function importData(file) {
@@ -1038,6 +1058,9 @@ async function importData(file) {
     }
     if (data.plan !== undefined) settings.plan = data.plan;
     if (data.targets) settings.targets = Object.assign(settings.targets, data.targets);
+    if (data.refCard) settings.refCard = Object.assign(settings.refCard, data.refCard);
+    if (data.glmModel) settings.glmModel = data.glmModel;
+    if (data.dsModel) settings.dsModel = data.dsModel;
     if (data.useWeekTargets !== undefined) settings.useWeekTargets = !!data.useWeekTargets;
     if (data.weekTargets) settings.weekTargets = Object.assign(settings.weekTargets, data.weekTargets);
     if (data.user) settings.user = Object.assign(settings.user, data.user);
