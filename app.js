@@ -339,10 +339,16 @@ const NUTRITION_PROMPT = `你是营养标签读取助手。请仔细阅读这张
 function matchWeightRefs(foodNames) {
   const matches = [];
   const seen = new Set();
+  // 优先使用用户食物库（营养来自真实标签），再使用内置参考库
+  const pool = allCustomFoods.map((food) => ({
+    name: food.name,
+    weight_g: food.weight_g,
+    per100: food.per100 || null
+  })).concat(weightRefs);
   for (const name of foodNames) {
     const n = String(name || '').trim();
     if (!n) continue;
-    for (const ref of weightRefs) {
+    for (const ref of pool) {
       if (seen.has(ref.name)) continue;
       if (ref.name === n || ref.name.includes(n) || n.includes(ref.name)) {
         seen.add(ref.name);
@@ -380,6 +386,7 @@ function analyzerPrompt(visionText, foodNames) {
 识别结果中的 size_cm 是参照卡片比例尺估算的食物尺寸。如果 package_info 提供了包装净含量/规格（如 15个275克），请优先按 净含量÷总数×实际数量 计算重量，包装信息优先于尺寸估算，不要用体积密度去猜；没有包装信息时才用 size_cm 和常见份量参考估算。weight_g 必须是可食部净重（去骨/去壳/去皮的重量）；如果食物带骨或带壳（如鸭腿、鸡腿、鱼、虾、蟹），先估算带骨/带壳毛重，再按常见可食部比例（如鸭腿约60-70%）折算成净重，并在 notes 中注明毛重与可食部比例。
 常见份量参考（来自薄荷估重参考库）：
 ${refLines || '（无匹配条目）'}
+如果某个食物没有任何参考条目，说明它不在参考库和用户食物库中，请用通用营养知识估算，并在 notes 中注明"通用知识估算，可能不准"。
 严格按以下 JSON 格式输出（不要输出其他文字）：
 {"foods":[{"name":"食物名称","weight_g":0,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0}],"totals":{"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0},"notes":"简要备注，如估重依据或提醒"}
 
@@ -401,6 +408,7 @@ function textAnalyzerPrompt(text) {
   return `你是专业的减脂营养师。请根据用户的文字描述，识别每一种食物并估算重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出这一餐的总量。估算要保守，宁可低估也不要高估。weight_g 必须是可食部净重；如果描述里包含包装信息（如"一袋275克15个，吃了11个"），按 净含量÷总数×数量 计算。用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；今日（${dayLabel}）目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
 常见份量参考（来自薄荷估重参考库，仅作校准）：
 ${refLines || '（无匹配条目）'}
+如果某个食物没有任何参考条目，说明它不在参考库和用户食物库中，请用通用营养知识估算，并在 notes 中注明"通用知识估算，可能不准"。
 严格按以下 JSON 格式输出（不要输出其他文字）：
 {"foods":[{"name":"食物名称","weight_g":0,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0}],"totals":{"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0},"notes":"简要备注"}
 
