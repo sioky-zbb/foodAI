@@ -1124,6 +1124,8 @@ async function importData(file) {
     if (data.refCard) settings.refCard = Object.assign(settings.refCard, data.refCard);
     if (data.glmModel) settings.glmModel = data.glmModel;
     if (data.dsModel) settings.dsModel = data.dsModel;
+    if (data.glmKey) settings.glmKey = data.glmKey;
+    if (data.dsKey) settings.dsKey = data.dsKey;
     if (data.useWeekTargets !== undefined) settings.useWeekTargets = !!data.useWeekTargets;
     if (data.weekTargets) settings.weekTargets = Object.assign(settings.weekTargets, data.weekTargets);
     if (data.user) settings.user = Object.assign(settings.user, data.user);
