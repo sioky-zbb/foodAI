@@ -27,6 +27,29 @@ function localDateString(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+const DAY_META = [
+  { key: 'sun', label: '周日' },
+  { key: 'mon', label: '周一' },
+  { key: 'tue', label: '周二' },
+  { key: 'wed', label: '周三' },
+  { key: 'thu', label: '周四' },
+  { key: 'fri', label: '周五' },
+  { key: 'sat', label: '周六' }
+];
+
+function dayMetaForDate(dateStr) {
+  const d = new Date(String(dateStr || localDateString()) + 'T00:00:00');
+  return DAY_META[d.getDay()];
+}
+
+function targetsForDate(dateStr) {
+  if (settings.useWeekTargets) {
+    const wk = settings.weekTargets[dayMetaForDate(dateStr).key];
+    if (wk) return wk;
+  }
+  return settings.targets;
+}
+
 function uid() {
   if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -44,6 +67,16 @@ const DEFAULT_SETTINGS = {
   dsUrl: 'https://api.deepseek.com/chat/completions',
   refCard: { type: 'none', len: 11.2, wid: 6.8 },
   targets: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+  useWeekTargets: false,
+  weekTargets: {
+    mon: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+    tue: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+    wed: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+    thu: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+    fri: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+    sat: { calories: 1800, protein: 120, carbs: 180, fat: 60 },
+    sun: { calories: 1800, protein: 120, carbs: 180, fat: 60 }
+  },
   user: { weight: '', height: '' },
   plan: ''
 };
@@ -334,7 +367,8 @@ async function loadWeightRefs() {
 
 function analyzerPrompt(visionText, foodNames) {
   const user = settings.user;
-  const targets = settings.targets;
+  const targets = targetsForDate(currentDate);
+  const dayLabel = dayMetaForDate(currentDate).label;
   const refLines = matchWeightRefs(foodNames || [])
     .map((ref) => {
       const n = ref.per100;
@@ -342,7 +376,7 @@ function analyzerPrompt(visionText, foodNames) {
       return `- ${ref.name}：约${ref.weight_g}克/份`;
     })
     .join('\n');
-  return `你是专业的减脂营养师。请根据下面的"食物识别结果"估算每项食物的重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出这一餐的总量。参照常见食物营养数据库（熟重、可食部），估算要保守，宁可低估也不要高估，因为用户正在减脂。用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；每日目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
+  return `你是专业的减脂营养师。请根据下面的"食物识别结果"估算每项食物的重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出这一餐的总量。参照常见食物营养数据库（熟重、可食部），估算要保守，宁可低估也不要高估，因为用户正在减脂。用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；今日（${dayLabel}）目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
 识别结果中的 size_cm 是参照卡片比例尺估算的食物尺寸。如果 package_info 提供了包装净含量/规格（如 15个275克），请优先按 净含量÷总数×实际数量 计算重量，包装信息优先于尺寸估算，不要用体积密度去猜；没有包装信息时才用 size_cm 和常见份量参考估算。weight_g 必须是可食部净重（去骨/去壳/去皮的重量）；如果食物带骨或带壳（如鸭腿、鸡腿、鱼、虾、蟹），先估算带骨/带壳毛重，再按常见可食部比例（如鸭腿约60-70%）折算成净重，并在 notes 中注明毛重与可食部比例。
 常见份量参考（来自薄荷估重参考库）：
 ${refLines || '（无匹配条目）'}
@@ -355,9 +389,10 @@ ${visionText}`;
 
 function evaluatePrompt(daySummary, planText) {
   const user = settings.user;
-  const targets = settings.targets;
+  const targets = targetsForDate(currentDate);
+  const dayLabel = dayMetaForDate(currentDate).label;
   return `你是用户的减脂教练。请基于以下信息评价用户今天的饮食并给出简短、具体、可执行的建议（中文，150字以内）：
-用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；每日目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
+用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；今日（${dayLabel}）目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
 训练计划：${planText || '（未设置）'}
 
 今日饮食记录：
@@ -390,7 +425,7 @@ function mealTotals(meals) {
 function renderTodayTotals() {
   const meals = allMeals.filter((meal) => meal.date === currentDate);
   const totals = mealTotals(meals);
-  const targets = settings.targets;
+  const targets = targetsForDate(currentDate);
   const item = (label, value, unit, key, cls) => {
     const target = targets[key];
     const over = target > 0 && value > target * 1.15;
@@ -885,7 +920,9 @@ async function exportData() {
     user: settings.user,
     meals,
     body,
-    customFoods
+    customFoods,
+    useWeekTargets: settings.useWeekTargets,
+    weekTargets: settings.weekTargets
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -911,6 +948,8 @@ async function importData(file) {
     }
     if (data.plan !== undefined) settings.plan = data.plan;
     if (data.targets) settings.targets = Object.assign(settings.targets, data.targets);
+    if (data.useWeekTargets !== undefined) settings.useWeekTargets = !!data.useWeekTargets;
+    if (data.weekTargets) settings.weekTargets = Object.assign(settings.weekTargets, data.weekTargets);
     if (data.user) settings.user = Object.assign(settings.user, data.user);
     saveSettings();
     await loadAllData();
@@ -921,6 +960,22 @@ async function importData(file) {
 }
 
 /* ============ 设置界面 ============ */
+function renderWeekTargetsForm() {
+  const wrap = $('#weekTargetsWrap');
+  if (!wrap) return;
+  wrap.classList.toggle('hidden', !settings.useWeekTargets);
+  wrap.innerHTML = DAY_META.map((day) => {
+    const t = settings.weekTargets[day.key] || settings.targets;
+    return `<div class="week-target-row">
+      <span class="day-label">${day.label}</span>
+      <input type="number" data-day="${day.key}" data-nut="calories" value="${t.calories}" placeholder="热量" inputmode="numeric">
+      <input type="number" data-day="${day.key}" data-nut="protein" value="${t.protein}" placeholder="蛋白" inputmode="decimal">
+      <input type="number" data-day="${day.key}" data-nut="carbs" value="${t.carbs}" placeholder="碳水" inputmode="decimal">
+      <input type="number" data-day="${day.key}" data-nut="fat" value="${t.fat}" placeholder="脂肪" inputmode="decimal">
+    </div>`;
+  }).join('');
+}
+
 function fillSettingsForm() {
   $('#glmKey').value = settings.glmKey;
   $('#glmModel').value = settings.glmModel;
@@ -929,6 +984,8 @@ function fillSettingsForm() {
   $('#refType').value = settings.refCard.type;
   $('#refLen').value = settings.refCard.len;
   $('#refWid').value = settings.refCard.wid;
+  $('#useWeekTargets').checked = !!settings.useWeekTargets;
+  renderWeekTargetsForm();
   $('#targetCal').value = settings.targets.calories;
   $('#targetProtein').value = settings.targets.protein;
   $('#targetCarbs').value = settings.targets.carbs;
@@ -948,6 +1005,16 @@ function collectSettingsForm() {
     len: num($('#refLen').value) || 11.2,
     wid: num($('#refWid').value) || 6.8
   };
+  settings.useWeekTargets = !!$('#useWeekTargets').checked;
+  if (settings.useWeekTargets) {
+    document.querySelectorAll('#weekTargetsWrap input').forEach((input) => {
+      const day = input.dataset.day;
+      const nut = input.dataset.nut;
+      if (!day || !nut) return;
+      if (!settings.weekTargets[day]) settings.weekTargets[day] = {};
+      settings.weekTargets[day][nut] = num(input.value);
+    });
+  }
   settings.targets = {
     calories: num($('#targetCal').value) || 1800,
     protein: num($('#targetProtein').value) || 120,
@@ -1244,6 +1311,9 @@ function bindEvents() {
     $('#settingsStatus').textContent = '设置已保存 ✓';
     $('#settingsStatus').className = 'status ok';
     renderTodayTotals();
+  });
+  $('#useWeekTargets').addEventListener('change', () => {
+    $('#weekTargetsWrap').classList.toggle('hidden', !$('#useWeekTargets').checked);
   });
 
   $('#testGlmBtn').addEventListener('click', () => {

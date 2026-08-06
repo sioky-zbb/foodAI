@@ -172,6 +172,10 @@
           <input type="number" id="userWeight" placeholder="当前体重 kg" step="0.1" inputmode="decimal">
           <input type="number" id="userHeight" placeholder="身高 cm" inputmode="numeric">
         </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px">
+          <input type="checkbox" id="useWeekTargets" style="width:auto"> 按星期分别设置目标（训练日/休息日不同热量）
+        </label>
+        <div id="weekTargetsWrap" class="hidden" style="margin-top:10px"></div>
         <button id="saveSettingsBtn" class="primary-btn">保存设置</button>
       </div>
       <div class="card">
