@@ -80,6 +80,41 @@
         <div id="textStatus" class="status"></div>
       </div>
 
+      <div class="card leftover-card">
+        <h2>饭后剩余核对（可选）</h2>
+        <p class="muted">如果没吃完，饭后用同样角度拍剩余的食物，AI 识别后从餐前记录中扣除，只记录实际吃进去的量。</p>
+        <label class="capture-label" for="leftoverInput">
+          <span class="camera-icon">📷</span>
+          <span id="leftoverHint">剩余：俯视图（工牌平放旁边）</span>
+        </label>
+        <input type="file" id="leftoverInput" accept="image/*" capture="environment" hidden>
+        <div class="btn-row">
+          <label class="small-btn" style="cursor:pointer">🖼 从相册选择剩余俯视图<input type="file" id="leftoverAlbumInput" accept="image/*" hidden></label>
+        </div>
+        <div id="leftoverPreviewWrap" class="photo-preview hidden">
+          <img id="leftoverPreview" alt="剩余俯视图">
+          <button id="clearLeftover" class="small-btn">✕ 清除</button>
+        </div>
+        <label class="capture-label secondary-capture" for="leftoverInput2">
+          <span class="camera-icon">📐</span>
+          <span id="leftoverHint2">剩余：前上45°（可选，工牌和食物都别动）</span>
+        </label>
+        <input type="file" id="leftoverInput2" accept="image/*" capture="environment" hidden>
+        <div class="btn-row">
+          <label class="small-btn" style="cursor:pointer">🖼 从相册选择剩余45°<input type="file" id="leftoverAlbumInput2" accept="image/*" hidden></label>
+        </div>
+        <div id="leftoverPreviewWrap2" class="photo-preview hidden">
+          <img id="leftoverPreview2" alt="剩余45°图">
+          <button id="clearLeftover2" class="small-btn">✕ 清除</button>
+        </div>
+        <div class="btn-row">
+          <button id="leftoverAnalyzeBtn" class="primary-btn">识别剩余食物</button>
+          <button id="applyLeftoverBtn" class="secondary-btn" disabled>计算实际摄入（餐前−剩余）</button>
+        </div>
+        <div id="leftoverStatus" class="status"></div>
+        <div id="leftoverResult" class="ai-output hidden"></div>
+      </div>
+
       <div id="analysisResult" class="hidden"></div>
       <div id="todayMeals"></div>
 

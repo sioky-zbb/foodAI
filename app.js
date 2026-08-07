@@ -477,6 +477,38 @@ ${refLines || '（无匹配条目）'}
 ${text}`;
 }
 
+function leftoverVisionPrompt() {
+  const ref = settings.refCard;
+  let refLine = '';
+  if (ref.type === 'idcard') {
+    refLine = '画面中有一张身份证或银行卡（标准尺寸长8.5cm、宽5.4cm），请把它当作比例尺，据此估算每个食物的实际尺寸（cm）。';
+  } else if (ref.type === 'custom') {
+    const len = num(ref.len) || 11.2;
+    const wid = num(ref.wid) || 6.8;
+    refLine = `画面中有一张卡片（长${len}cm、宽${wid}cm，尺寸指卡片本体，不含挂扣/挂绳等附件），请以卡片本体的边缘和四角为测量基准，忽略凸出的挂扣；如果挂扣遮挡了长边，请改用短边宽度${wid}cm 作基准。`;
+  }
+  return `你是食物识别助手。请仔细查看这张图片，识别图中剩余的食物和饮品（这是用户饭后没吃完的部分）。${refLine}请务必逐一列出画面中所有剩余食物，不要遗漏，每一样单独输出一项，并估算每项剩余重量（克）。如果图片中没有食物，输出 foods 为空数组。只描述你确实看到的内容，不要编造。严格按以下 JSON 格式输出（不要输出其他文字）：
+{"foods":[{"name":"食物名称","portion":"大致份量","cooking":"烹饪方式","ingredients":"可见食材","size_cm":"约长8cm×宽5cm×高3cm"}],"scene":"场景描述"}`;
+}
+
+function leftoverAnalyzerPrompt(visionText, foodNames) {
+  const refLines = matchWeightRefs(foodNames || [])
+    .map((ref) => {
+      const n = ref.per100;
+      if (n) return `- ${ref.name}：约${ref.weight_g}克/份，每100克约 ${n.calories_kcal}kcal / 蛋白${n.protein_g}g / 碳水${n.carbs_g}g / 脂肪${n.fat_g}g`;
+      return `- ${ref.name}：约${ref.weight_g}克/份`;
+    })
+    .join('\n');
+  return `你是专业的减脂营养师。请根据下面的"剩余食物识别结果"估算每项剩余食物的重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出剩余总量。这是用户饭后没吃完的部分，估算要保守，宁可低估也不要高估。weight_g 必须是可食部净重。
+常见份量参考（仅作校准）：
+${refLines || '（无匹配条目）'}
+严格按以下 JSON 格式输出（不要输出其他文字）：
+{"foods":[{"name":"食物名称","weight_g":0,"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0}],"totals":{"calories_kcal":0,"protein_g":0,"carbs_g":0,"fat_g":0},"notes":"简要备注"}
+
+剩余食物识别结果：
+${visionText}`;
+}
+
 function evaluatePrompt(daySummary, planText) {
   const user = settings.user;
   const targets = targetsForDate(currentDate);
@@ -494,6 +526,9 @@ let currentDate = localDateString();
 let pendingImageDataUrl = null;
 let pendingImageDataUrl2 = null;
 let pendingResult = null;
+let pendingLeftover = null;
+let leftoverImageDataUrl = null;
+let leftoverImageDataUrl2 = null;
 let allMeals = [];
 let allBody = [];
 let allCustomFoods = [];
@@ -574,6 +609,7 @@ async function runAnalysis() {
     setStatus('#analyzeStatus', '请先到「设置」填写 GLM API Key。', 'error');
     return;
   }
+  resetLeftoverState();
   const button = $('#analyzeBtn');
   button.disabled = true;
   setStatus('#analyzeStatus', '第 1/2 步：GLM 正在识别图片中的食物…', 'loading');
@@ -681,6 +717,7 @@ async function runTextAnalysis() {
     setTextStatus('请先到「设置」配置 API Key。', 'error');
     return;
   }
+  resetLeftoverState();
   const detected = detectMealTypeFromText(text);
   if (detected) $('#textMealType').value = detected;
   const mealHits = (text.match(/早上|早餐|早饭|早晨|中午|午餐|午饭|中饭|晚上|晚餐|晚饭|傍晚|加餐|下午茶|宵夜|夜宵/g) || []);
@@ -739,6 +776,184 @@ async function runTextAnalysis() {
   } finally {
     button.disabled = false;
   }
+}
+
+function setLeftoverStatus(text, kind) {
+  const node = $('#leftoverStatus');
+  node.className = 'status' + (kind ? ' ' + kind : '');
+  node.textContent = text || '';
+}
+
+function resetLeftoverState() {
+  pendingLeftover = null;
+  leftoverImageDataUrl = null;
+  leftoverImageDataUrl2 = null;
+  $('#leftoverInput').value = '';
+  $('#leftoverInput2').value = '';
+  $('#leftoverAlbumInput').value = '';
+  $('#leftoverAlbumInput2').value = '';
+  $('#leftoverPreviewWrap').classList.add('hidden');
+  $('#leftoverPreviewWrap2').classList.add('hidden');
+  $('#leftoverResult').classList.add('hidden');
+  $('#applyLeftoverBtn').disabled = true;
+  $('#leftoverHint').textContent = '剩余：俯视图（工牌平放旁边）';
+  $('#leftoverHint2').textContent = '剩余：前上45°（可选，工牌和食物都别动）';
+  setLeftoverStatus('', '');
+}
+
+function renderLeftoverResult() {
+  if (!pendingLeftover) return;
+  const rows = pendingLeftover.foods.map((food) =>
+    `${food.name} ${food.weight_g}g（${food.calories_kcal}kcal）`
+  ).join('\n');
+  $('#leftoverResult').textContent =
+    `剩余合计：${Math.round(pendingLeftover.totals.calories_kcal)} kcal\n${rows}\n${pendingLeftover.notes || ''}`;
+  $('#leftoverResult').classList.remove('hidden');
+}
+
+async function runLeftoverAnalysis() {
+  if (!pendingResult) {
+    setLeftoverStatus('请先完成餐前分析（识别并核对餐前结果），再识别剩余。', 'error');
+    return;
+  }
+  if (!leftoverImageDataUrl) {
+    setLeftoverStatus('请先拍一张剩余食物的照片。', 'error');
+    return;
+  }
+  if (!settings.glmKey) {
+    setLeftoverStatus('请先到「设置」配置 GLM API Key。', 'error');
+    return;
+  }
+  const button = $('#leftoverAnalyzeBtn');
+  button.disabled = true;
+  setLeftoverStatus('正在识别剩余食物…', 'loading');
+  try {
+    const visionContent = [];
+    if (leftoverImageDataUrl2) {
+      visionContent.push({ type: 'text', text: '以下包含两张照片：第一张为主视角（俯视），第二张为前上45°视角，均为饭后剩余食物，工牌/卡片与食物保持不动。' });
+      visionContent.push({ type: 'image_url', image_url: { url: leftoverImageDataUrl } });
+      visionContent.push({ type: 'image_url', image_url: { url: leftoverImageDataUrl2 } });
+      visionContent.push({ type: 'text', text: leftoverVisionPrompt() });
+    } else {
+      visionContent.push({ type: 'image_url', image_url: { url: leftoverImageDataUrl } });
+      visionContent.push({ type: 'text', text: leftoverVisionPrompt() });
+    }
+    const visionText = await glmVision([{ role: 'user', content: visionContent }]);
+    const visionJson = extractJson(visionText);
+    const visionNames = visionJson && Array.isArray(visionJson.foods)
+      ? visionJson.foods.map((food) => String(food.name || '').trim()).filter(Boolean)
+      : [];
+    const visionDescription = visionJson ? JSON.stringify(visionJson, null, 2) : visionText;
+    let analysisText = null;
+    let parsed = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      analysisText = await analyzerChat([
+        { role: 'user', content: leftoverAnalyzerPrompt(visionDescription, visionNames) }
+      ]);
+      parsed = extractJson(analysisText);
+      if (parsed && Array.isArray(parsed.foods)) break;
+      if (attempt === 0) {
+        setLeftoverStatus('输出格式异常，自动重试…', 'loading');
+        await sleep(1500);
+      }
+    }
+    if (!parsed || !Array.isArray(parsed.foods)) {
+      throw new Error('模型返回格式无法解析，请重试。原始内容：' + analysisText.slice(0, 200));
+    }
+    const foods = parsed.foods.map((food) => ({
+      name: String(food.name || '未命名'),
+      weight_g: round(food.weight_g),
+      calories_kcal: round(food.calories_kcal),
+      protein_g: round(food.protein_g),
+      carbs_g: round(food.carbs_g),
+      fat_g: round(food.fat_g),
+      package_info: null
+    }));
+    const totals = { calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+    foods.forEach((food) => {
+      totals.calories_kcal += food.calories_kcal;
+      totals.protein_g += food.protein_g;
+      totals.carbs_g += food.carbs_g;
+      totals.fat_g += food.fat_g;
+    });
+    pendingLeftover = { foods, totals, notes: String(parsed.notes || '') };
+    renderLeftoverResult();
+    $('#applyLeftoverBtn').disabled = false;
+    setLeftoverStatus('剩余识别完成，可点「计算实际摄入」扣除。', 'ok');
+  } catch (error) {
+    setLeftoverStatus('识别失败：' + error.message, 'error');
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function computeEatenFromLeftover() {
+  if (!pendingResult || !pendingLeftover) return;
+  const leftoverByName = new Map();
+  for (const lf of pendingLeftover.foods) {
+    let best = null;
+    let bestScore = 0;
+    for (const pre of pendingResult.foods) {
+      const score = foodMatchScore(pre.name, lf.name);
+      if (score > bestScore) {
+        bestScore = score;
+        best = pre;
+      }
+    }
+    if (best && bestScore >= 45) {
+      leftoverByName.set(best.name, (leftoverByName.get(best.name) || 0) + lf.weight_g);
+    }
+  }
+  const originalKcal = Math.round(pendingResult.totals.calories_kcal);
+  const eaten = [];
+  for (const pre of pendingResult.foods) {
+    const leftoverW = leftoverByName.get(pre.name) || 0;
+    const eatenW = Math.max(0, pre.weight_g - leftoverW);
+    if (eatenW < 1) continue;
+    const ratio = pre.weight_g > 0 ? eatenW / pre.weight_g : 0;
+    eaten.push({
+      name: pre.name,
+      weight_g: round(eatenW),
+      calories_kcal: round(pre.calories_kcal * ratio),
+      protein_g: round(pre.protein_g * ratio),
+      carbs_g: round(pre.carbs_g * ratio),
+      fat_g: round(pre.fat_g * ratio),
+      package_info: pre.package_info || null
+    });
+  }
+  if (!eaten.length) {
+    setLeftoverStatus('剩余识别量不低于餐前估算（可能识别有误），请重新识别剩余或核对餐前结果。', 'error');
+    return;
+  }
+  const unmatchedLeftover = [];
+  for (const lf of pendingLeftover.foods) {
+    let matched = false;
+    for (const pre of pendingResult.foods) {
+      if (foodMatchScore(pre.name, lf.name) >= 45) {
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) unmatchedLeftover.push(lf.name);
+  }
+  const totals = { calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+  eaten.forEach((food) => {
+    totals.calories_kcal += food.calories_kcal;
+    totals.protein_g += food.protein_g;
+    totals.carbs_g += food.carbs_g;
+    totals.fat_g += food.fat_g;
+  });
+  pendingResult.foods = eaten;
+  pendingResult.totals = totals;
+  const unmatchedNote = unmatchedLeftover.length
+    ? `；剩余中有未匹配餐前记录的食物：${unmatchedLeftover.join('、')}`
+    : '';
+  pendingResult.notes = `${pendingResult.notes ? pendingResult.notes + '；' : ''}已扣除剩余（餐前 ${originalKcal} kcal → 实食 ${Math.round(totals.calories_kcal)} kcal）${unmatchedNote}`;
+  pendingLeftover = null;
+  $('#leftoverResult').classList.add('hidden');
+  $('#applyLeftoverBtn').disabled = true;
+  renderAnalysisResult();
+  setLeftoverStatus('已按剩余扣除，结果已更新为实际摄入，请核对后记录 ✓', 'ok');
 }
 
 function renderAnalysisResult() {
@@ -1467,6 +1682,49 @@ function bindEvents() {
     $('#photoPreviewWrap2').classList.add('hidden');
     $('#captureHint2').textContent = '＋第二视角（前上45°，工牌和食物都别动，可选）';
   });
+
+  async function handleLeftoverPhotoFile(file) {
+    if (!file) return;
+    try {
+      leftoverImageDataUrl = await fileToDataURL(file, 1280, 0.85);
+      $('#leftoverPreview').src = leftoverImageDataUrl;
+      $('#leftoverPreviewWrap').classList.remove('hidden');
+      $('#leftoverHint').textContent = '已选择剩余俯视图 ✓';
+    } catch (error) {
+      setLeftoverStatus('图片读取失败：' + error.message, 'error');
+    }
+  }
+  async function handleLeftoverPhotoFile2(file) {
+    if (!file) return;
+    try {
+      leftoverImageDataUrl2 = await fileToDataURL(file, 1280, 0.85);
+      $('#leftoverPreview2').src = leftoverImageDataUrl2;
+      $('#leftoverPreviewWrap2').classList.remove('hidden');
+      $('#leftoverHint2').textContent = '已选择剩余45° ✓';
+    } catch (error) {
+      setLeftoverStatus('图片读取失败：' + error.message, 'error');
+    }
+  }
+  $('#leftoverInput').addEventListener('change', (event) => handleLeftoverPhotoFile(event.target.files && event.target.files[0]));
+  $('#leftoverAlbumInput').addEventListener('change', (event) => handleLeftoverPhotoFile(event.target.files && event.target.files[0]));
+  $('#leftoverInput2').addEventListener('change', (event) => handleLeftoverPhotoFile2(event.target.files && event.target.files[0]));
+  $('#leftoverAlbumInput2').addEventListener('change', (event) => handleLeftoverPhotoFile2(event.target.files && event.target.files[0]));
+  $('#clearLeftover').addEventListener('click', () => {
+    leftoverImageDataUrl = null;
+    $('#leftoverInput').value = '';
+    $('#leftoverAlbumInput').value = '';
+    $('#leftoverPreviewWrap').classList.add('hidden');
+    $('#leftoverHint').textContent = '剩余：俯视图（工牌平放旁边）';
+  });
+  $('#clearLeftover2').addEventListener('click', () => {
+    leftoverImageDataUrl2 = null;
+    $('#leftoverInput2').value = '';
+    $('#leftoverAlbumInput2').value = '';
+    $('#leftoverPreviewWrap2').classList.add('hidden');
+    $('#leftoverHint2').textContent = '剩余：前上45°（可选，工牌和食物都别动）';
+  });
+  $('#leftoverAnalyzeBtn').addEventListener('click', runLeftoverAnalysis);
+  $('#applyLeftoverBtn').addEventListener('click', computeEatenFromLeftover);
 
   $('#analyzeBtn').addEventListener('click', runAnalysis);
   $('#textAnalyzeBtn').addEventListener('click', runTextAnalysis);
