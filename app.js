@@ -586,7 +586,10 @@ function renderTodayMeals() {
           <div class="macros">蛋白质 ${round(meal.totals.protein_g)}g · 碳水 ${round(meal.totals.carbs_g)}g · 脂肪 ${round(meal.totals.fat_g)}g</div>
         </div>
       </div>
-      <div class="btn-row"><button class="del-btn" data-del-meal="${meal.id}">删除</button></div>
+      <div class="btn-row">
+        <button class="small-btn" data-edit-meal="${meal.id}">编辑</button>
+        <button class="del-btn" data-del-meal="${meal.id}">删除</button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -956,6 +959,24 @@ function computeEatenFromLeftover() {
   setLeftoverStatus('已按剩余扣除，结果已更新为实际摄入，请核对后记录 ✓', 'ok');
 }
 
+function editMeal(mealId) {
+  const meal = allMeals.find((item) => item.id === mealId);
+  if (!meal) return;
+  resetLeftoverState();
+  pendingResult = {
+    editId: meal.id,
+    foods: (meal.foods || []).map((food) => Object.assign({}, food, { package_info: food.package_info || null })),
+    totals: Object.assign({ calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 }, meal.totals || {}),
+    notes: meal.notes || '',
+    visionRaw: meal.visionRaw || '',
+    thumb: meal.thumb || '',
+    mealType: meal.mealType
+  };
+  renderAnalysisResult();
+  $('#analysisResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setStatus('#analyzeStatus', '正在编辑已保存的记录，修改后点「保存修改」。', 'ok');
+}
+
 function renderAnalysisResult() {
   if (!pendingResult) return;
   const { foods, totals, notes } = pendingResult;
@@ -988,7 +1009,7 @@ function renderAnalysisResult() {
       </div>
       ${notes ? `<div class="result-notes">备注：${esc(notes)}</div>` : ''}
       <div class="save-result-row">
-        <button id="confirmSaveBtn" class="primary-btn">✓ 记录这一餐</button>
+        <button id="confirmSaveBtn" class="primary-btn">${pendingResult.editId ? '保存修改' : '✓ 记录这一餐'}</button>
         <button id="discardResultBtn" class="small-btn">放弃</button>
       </div>
     </div>`;
@@ -1050,11 +1071,13 @@ function renderAnalysisResult() {
 
 async function confirmSaveMeal() {
   if (!pendingResult) return;
+  const editId = pendingResult.editId || null;
+  const existing = editId ? allMeals.find((meal) => meal.id === editId) : null;
   const now = new Date();
   const meal = {
-    id: uid(),
-    date: currentDate,
-    time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+    id: editId || uid(),
+    date: existing ? existing.date : currentDate,
+    time: existing ? existing.time : `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
     mealType: pendingResult.mealType || $('#mealType').value,
     foods: pendingResult.foods,
     totals: pendingResult.totals,
@@ -1063,7 +1086,11 @@ async function confirmSaveMeal() {
     visionRaw: pendingResult.visionRaw
   };
   await idbPut('meals', meal);
-  allMeals.push(meal);
+  if (existing) {
+    allMeals = allMeals.map((item) => (item.id === editId ? meal : item));
+  } else {
+    allMeals.push(meal);
+  }
   pendingResult = null;
   pendingImageDataUrl = null;
   pendingImageDataUrl2 = null;
@@ -1076,7 +1103,7 @@ async function confirmSaveMeal() {
   $('#captureHint2').textContent = '＋第二视角（前上45°，工牌和食物都别动，可选）';
   $('#analysisResult').classList.add('hidden');
   $('#analyzeBtn').disabled = true;
-  setStatus('#analyzeStatus', '已记录 ✓', 'ok');
+  setStatus('#analyzeStatus', editId ? '已保存修改 ✓' : '已记录 ✓', 'ok');
   refreshToday();
 }
 
@@ -1350,8 +1377,11 @@ async function exportData() {
   document.body.appendChild(a);
   a.click();
   a.remove();
+  try {
+    window.open(url, '_blank');
+  } catch (error) { /* 部分环境禁止弹窗，忽略 */ }
   setTimeout(() => URL.revokeObjectURL(url), 5000);
-  setStatus('#settingsStatus', '备份已导出 ✓（若未看到文件，请改用分享面板）', 'ok');
+  setStatus('#settingsStatus', '备份已导出 ✓（若未看到文件，请用 Safari 打开本页（非主屏幕图标）再导出，或改用分享面板）', 'ok');
 }
 
 async function importData(file) {
@@ -1731,6 +1761,11 @@ function bindEvents() {
   $('#evaluateBtn').addEventListener('click', runEvaluate);
 
   $('#todayMeals').addEventListener('click', async (event) => {
+    const editBtn = event.target.closest('[data-edit-meal]');
+    if (editBtn) {
+      editMeal(editBtn.dataset.editMeal);
+      return;
+    }
     const button = event.target.closest('[data-del-meal]');
     if (!button) return;
     const id = button.dataset.delMeal;
