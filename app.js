@@ -1427,7 +1427,10 @@ async function exportData() {
     window.open(url, '_blank');
   } catch (error) { /* 部分环境禁止弹窗，忽略 */ }
   setTimeout(() => URL.revokeObjectURL(url), 5000);
-  setStatus('#settingsStatus', '备份已导出 ✓（若未看到文件，请用 Safari 打开本页（非主屏幕图标）再导出，或改用分享面板）', 'ok');
+  $('#backupOutput').value = JSON.stringify(data, null, 2);
+  $('#backupOutput').classList.remove('hidden');
+  $('#copyBackupBtn').classList.remove('hidden');
+  setStatus('#settingsStatus', '若没有弹出分享/下载，请点「复制备份内容」，粘贴到备忘录或“文件”保存为 .json 再导入。', 'ok');
 }
 
 async function importData(file) {
@@ -1886,6 +1889,17 @@ function bindEvents() {
 
   $('#exportBtn').addEventListener('click', exportData);
   $('#importBtn').addEventListener('click', () => $('#importFile').click());
+  $('#copyBackupBtn').addEventListener('click', async () => {
+    const text = $('#backupOutput').value;
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      $('#backupOutput').select();
+      document.execCommand('copy');
+    }
+    setStatus('#settingsStatus', '备份内容已复制 ✓ 粘贴到备忘录/文件，保存为 .json 后即可导入。', 'ok');
+  });
   $('#importFile').addEventListener('change', (event) => {
     const file = event.target.files && event.target.files[0];
     if (file) importData(file);
