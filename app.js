@@ -529,6 +529,7 @@ let pendingResult = null;
 let pendingLeftover = null;
 let leftoverImageDataUrl = null;
 let leftoverImageDataUrl2 = null;
+let leftoverBaselineMealId = null;
 let allMeals = [];
 let allBody = [];
 let allCustomFoods = [];
@@ -791,6 +792,7 @@ function resetLeftoverState() {
   pendingLeftover = null;
   leftoverImageDataUrl = null;
   leftoverImageDataUrl2 = null;
+  leftoverBaselineMealId = null;
   $('#leftoverInput').value = '';
   $('#leftoverInput2').value = '';
   $('#leftoverAlbumInput').value = '';
@@ -815,9 +817,18 @@ function renderLeftoverResult() {
 }
 
 async function runLeftoverAnalysis() {
+  let baselineNote = '使用当前待确认的餐前结果';
   if (!pendingResult) {
-    setLeftoverStatus('请先完成餐前分析（识别并核对餐前结果），再识别剩余。', 'error');
-    return;
+    const todayMeals = allMeals
+      .filter((meal) => meal.date === currentDate)
+      .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+    const latest = todayMeals[todayMeals.length - 1];
+    if (!latest) {
+      setLeftoverStatus('今天还没有已保存的餐前记录，请先完成餐前分析并记录。', 'error');
+      return;
+    }
+    leftoverBaselineMealId = latest.id;
+    baselineNote = `以今天最近一条已保存记录为基准（${latest.mealType} ${latest.time}，${Math.round(latest.totals.calories_kcal)} kcal）`;
   }
   if (!leftoverImageDataUrl) {
     setLeftoverStatus('请先拍一张剩余食物的照片。', 'error');
@@ -829,7 +840,7 @@ async function runLeftoverAnalysis() {
   }
   const button = $('#leftoverAnalyzeBtn');
   button.disabled = true;
-  setLeftoverStatus('正在识别剩余食物…', 'loading');
+  setLeftoverStatus('正在识别剩余食物…（' + baselineNote + '）', 'loading');
   try {
     const visionContent = [];
     if (leftoverImageDataUrl2) {
@@ -890,13 +901,31 @@ async function runLeftoverAnalysis() {
   }
 }
 
-function computeEatenFromLeftover() {
-  if (!pendingResult || !pendingLeftover) return;
+async function computeEatenFromLeftover() {
+  if (!pendingLeftover) return;
+  let preFoods = [];
+  let preTotals = { calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+  let targetMeal = null;
+  if (pendingResult) {
+    preFoods = pendingResult.foods || [];
+    preTotals = pendingResult.totals || preTotals;
+  } else if (leftoverBaselineMealId) {
+    targetMeal = allMeals.find((meal) => meal.id === leftoverBaselineMealId);
+    if (!targetMeal) {
+      setLeftoverStatus('餐前记录不存在（可能已删除），请重新记录后再核对剩余。', 'error');
+      return;
+    }
+    preFoods = targetMeal.foods || [];
+    preTotals = targetMeal.totals || preTotals;
+  } else {
+    setLeftoverStatus('缺少餐前基准，请先完成餐前分析或记录餐前热量。', 'error');
+    return;
+  }
   const leftoverByName = new Map();
   for (const lf of pendingLeftover.foods) {
     let best = null;
     let bestScore = 0;
-    for (const pre of pendingResult.foods) {
+    for (const pre of preFoods) {
       const score = foodMatchScore(pre.name, lf.name);
       if (score > bestScore) {
         bestScore = score;
@@ -907,9 +936,9 @@ function computeEatenFromLeftover() {
       leftoverByName.set(best.name, (leftoverByName.get(best.name) || 0) + lf.weight_g);
     }
   }
-  const originalKcal = Math.round(pendingResult.totals.calories_kcal);
+  const originalKcal = Math.round(preTotals.calories_kcal);
   const eaten = [];
-  for (const pre of pendingResult.foods) {
+  for (const pre of preFoods) {
     const leftoverW = leftoverByName.get(pre.name) || 0;
     const eatenW = Math.max(0, pre.weight_g - leftoverW);
     if (eatenW < 1) continue;
@@ -931,7 +960,7 @@ function computeEatenFromLeftover() {
   const unmatchedLeftover = [];
   for (const lf of pendingLeftover.foods) {
     let matched = false;
-    for (const pre of pendingResult.foods) {
+    for (const pre of preFoods) {
       if (foodMatchScore(pre.name, lf.name) >= 45) {
         matched = true;
         break;
@@ -946,17 +975,34 @@ function computeEatenFromLeftover() {
     totals.carbs_g += food.carbs_g;
     totals.fat_g += food.fat_g;
   });
-  pendingResult.foods = eaten;
-  pendingResult.totals = totals;
   const unmatchedNote = unmatchedLeftover.length
     ? `；剩余中有未匹配餐前记录的食物：${unmatchedLeftover.join('、')}`
     : '';
-  pendingResult.notes = `${pendingResult.notes ? pendingResult.notes + '；' : ''}已扣除剩余（餐前 ${originalKcal} kcal → 实食 ${Math.round(totals.calories_kcal)} kcal）${unmatchedNote}`;
+  const noteTail = `已扣除剩余（餐前 ${originalKcal} kcal → 实食 ${Math.round(totals.calories_kcal)} kcal）${unmatchedNote}`;
+  if (pendingResult) {
+    pendingResult.foods = eaten;
+    pendingResult.totals = totals;
+    pendingResult.notes = `${pendingResult.notes ? pendingResult.notes + '；' : ''}${noteTail}`;
+    pendingLeftover = null;
+    $('#leftoverResult').classList.add('hidden');
+    $('#applyLeftoverBtn').disabled = true;
+    renderAnalysisResult();
+    setLeftoverStatus('已按剩余扣除，结果已更新为实际摄入，请核对后记录 ✓', 'ok');
+    return;
+  }
+  // 已保存记录模式：直接更新原记录
+  targetMeal.foods = eaten;
+  targetMeal.totals = totals;
+  targetMeal.notes = `${targetMeal.notes ? targetMeal.notes + '；' : ''}${noteTail}`;
+  await idbPut('meals', targetMeal);
+  allMeals = allMeals.map((meal) => (meal.id === targetMeal.id ? targetMeal : meal));
   pendingLeftover = null;
+  leftoverBaselineMealId = null;
   $('#leftoverResult').classList.add('hidden');
   $('#applyLeftoverBtn').disabled = true;
-  renderAnalysisResult();
-  setLeftoverStatus('已按剩余扣除，结果已更新为实际摄入，请核对后记录 ✓', 'ok');
+  refreshToday();
+  renderHistory();
+  setLeftoverStatus(`已更新已保存的「${targetMeal.mealType} ${targetMeal.time}」记录：餐前 ${originalKcal} kcal → 实食 ${Math.round(totals.calories_kcal)} kcal ✓`, 'ok');
 }
 
 function editMeal(mealId) {
