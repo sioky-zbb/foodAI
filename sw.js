@@ -1,4 +1,4 @@
-const CACHE = 'foodlens-v4';
+const CACHE = 'foodlens-v5';
 const ASSETS = [
   './',
   './index.html',

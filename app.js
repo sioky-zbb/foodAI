@@ -431,7 +431,7 @@ async function loadWeightRefs() {
   }
 }
 
-function analyzerPrompt(visionText, foodNames) {
+function analyzerPrompt(visionText, foodNames, userHint) {
   const user = settings.user;
   const targets = targetsForDate(currentDate);
   const dayLabel = dayMetaForDate(currentDate).label;
@@ -443,6 +443,7 @@ function analyzerPrompt(visionText, foodNames) {
     })
     .join('\n');
   return `你是专业的减脂营养师。请根据下面的"食物识别结果"估算每项食物的重量（克）、热量（千卡）、蛋白质（克）、碳水化合物（克）、脂肪（克），并给出这一餐的总量。参照常见食物营养数据库（熟重、可食部），估算要保守，宁可低估也不要高估，因为用户正在减脂。用户信息：${user.height ? `身高${user.height}cm` : ''} ${user.weight ? `体重${user.weight}kg` : ''}；今日（${dayLabel}）目标：热量${targets.calories}kcal、蛋白质${targets.protein}g、碳水${targets.carbs}g、脂肪${targets.fat}g。
+${userHint ? `用户补充说明（请优先遵循）：${userHint}` : ''}
 识别结果中的 size_cm 是参照卡片比例尺估算的食物尺寸。如果 package_info 提供了包装净含量/规格（如 15个275克），请优先按 净含量÷总数×实际数量 计算重量，包装信息优先于尺寸估算，不要用体积密度去猜；没有包装信息时才用 size_cm 和常见份量参考估算。weight_g 必须是可食部净重（去骨/去壳/去皮的重量）；如果食物带骨或带壳（如鸭腿、鸡腿、鱼、虾、蟹），先估算带骨/带壳毛重，再按常见可食部比例（如鸭腿约60-70%）折算成净重，并在 notes 中注明毛重与可食部比例。
 常见份量参考（来自薄荷估重参考库）：
 ${refLines || '（无匹配条目）'}
@@ -636,11 +637,12 @@ async function runAnalysis() {
     const visionDescription = visionJson ? JSON.stringify(visionJson, null, 2) : visionText;
 
     setStatus('#analyzeStatus', settings.dsKey ? '第 2/2 步：DeepSeek 正在估重和计算营养…' : '第 2/2 步：正在估重和计算营养…', 'loading');
+    const userHint = ($('#analyzeHint') ? $('#analyzeHint').value : '').trim();
     let analysisText = null;
     let parsed = null;
     for (let attempt = 0; attempt < 2; attempt++) {
       analysisText = await analyzerChat([
-        { role: 'user', content: analyzerPrompt(visionDescription, visionNames) }
+        { role: 'user', content: analyzerPrompt(visionDescription, visionNames, userHint) }
       ]);
       parsed = extractJson(analysisText);
       if (parsed && Array.isArray(parsed.foods)) break;
