@@ -574,7 +574,7 @@ function renderTodayMeals() {
     return;
   }
   $('#todayMeals').innerHTML = meals.map((meal) => {
-    const foods = meal.foods.map((food) => `${food.name} ${round(food.weight_g)}g`).join('、');
+    const foods = meal.foods.map((food) => `${food.name}${food.weight_g > 0 ? ` ${round(food.weight_g)}g` : ''}`).join('、');
     return `<div class="meal-item">
       <div class="head">
         <span class="tag">${esc(meal.mealType)} · ${esc(meal.time || '')}</span>
@@ -780,6 +780,124 @@ async function runTextAnalysis() {
   } finally {
     button.disabled = false;
   }
+}
+
+/* ============ 手动记录 ============ */
+let manualFoods = [];
+
+function refreshManualDatalist() {
+  const datalist = $('#manualFoodDatalist');
+  if (!datalist) return;
+  datalist.innerHTML = allCustomFoods
+    .map((food) => `<option value="${esc(food.name)}"></option>`)
+    .join('');
+}
+
+function setManualStatus(text, kind) {
+  const node = $('#manualStatus');
+  node.className = 'status' + (kind ? ' ' + kind : '');
+  node.textContent = text || '';
+}
+
+function renderManualList() {
+  const wrap = $('#manualList');
+  const saveBtn = $('#manualSaveBtn');
+  if (!manualFoods.length) {
+    wrap.innerHTML = '<p class="muted">还没有添加食物，先填写上方名称和营养数据。</p>';
+    saveBtn.disabled = true;
+    return;
+  }
+  const totals = { calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+  manualFoods.forEach((food) => {
+    totals.calories_kcal += food.calories_kcal;
+    totals.protein_g += food.protein_g;
+    totals.carbs_g += food.carbs_g;
+    totals.fat_g += food.fat_g;
+  });
+  const rows = manualFoods.map((food, index) => {
+    const weightText = food.weight_g > 0 ? ` ${round(food.weight_g)}g` : '';
+    return `<div class="manual-food-row">
+      <div class="head">
+        <strong>${esc(food.name)}</strong>${weightText}
+        <button class="del-btn" data-manual-del="${index}">删除</button>
+      </div>
+      <div class="macros">${Math.round(food.calories_kcal)} kcal · 蛋白 ${round(food.protein_g)}g · 碳水 ${round(food.carbs_g)}g · 脂肪 ${round(food.fat_g)}g</div>
+    </div>`;
+  }).join('');
+  wrap.innerHTML = rows +
+    `<div class="manual-totals">小计：${Math.round(totals.calories_kcal)} kcal · 蛋白 ${round(totals.protein_g)}g · 碳水 ${round(totals.carbs_g)}g · 脂肪 ${round(totals.fat_g)}g</div>`;
+  saveBtn.disabled = false;
+  saveBtn.textContent = `✓ 保存为「${$('#manualMealType').value}」记录`;
+}
+
+function addManualFood() {
+  const name = $('#manualName').value.trim();
+  if (!name) {
+    setManualStatus('请填写食物名称。', 'error');
+    return;
+  }
+  const food = {
+    name,
+    weight_g: num($('#manualWeight').value),
+    calories_kcal: num($('#manualKcal').value),
+    protein_g: num($('#manualProtein').value),
+    carbs_g: num($('#manualCarbs').value),
+    fat_g: num($('#manualFat').value),
+    package_info: null
+  };
+  manualFoods.push(food);
+  $('#manualName').value = '';
+  $('#manualWeight').value = '';
+  $('#manualKcal').value = '';
+  $('#manualProtein').value = '';
+  $('#manualCarbs').value = '';
+  $('#manualFat').value = '';
+  renderManualList();
+  setManualStatus(`已添加「${name}」，可继续添加其他食物 ✓`, 'ok');
+  $('#manualName').focus();
+}
+
+function clearManualList() {
+  if (manualFoods.length && !window.confirm('清空手动记录列表？')) return;
+  manualFoods = [];
+  renderManualList();
+  setManualStatus('', '');
+}
+
+async function saveManualMeal() {
+  if (!manualFoods.length) return;
+  const mealType = $('#manualMealType').value;
+  const totals = { calories_kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
+  manualFoods.forEach((food) => {
+    totals.calories_kcal += food.calories_kcal;
+    totals.protein_g += food.protein_g;
+    totals.carbs_g += food.carbs_g;
+    totals.fat_g += food.fat_g;
+  });
+  const now = new Date();
+  const meal = {
+    id: uid(),
+    date: currentDate,
+    time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
+    mealType,
+    foods: manualFoods.map((food) => Object.assign({}, food)),
+    totals: {
+      calories_kcal: round(totals.calories_kcal),
+      protein_g: round(totals.protein_g),
+      carbs_g: round(totals.carbs_g),
+      fat_g: round(totals.fat_g)
+    },
+    notes: '手动记录',
+    thumb: '',
+    visionRaw: ''
+  };
+  await idbPut('meals', meal);
+  allMeals.push(meal);
+  manualFoods = [];
+  renderManualList();
+  setManualStatus(`已保存「${mealType}」记录 ✓（${Math.round(meal.totals.calories_kcal)} kcal）`, 'ok');
+  refreshToday();
+  renderHistory();
 }
 
 function setLeftoverStatus(text, kind) {
@@ -1344,6 +1462,7 @@ async function saveFood() {
   await idbPut('customFoods', record);
   allCustomFoods = await idbAll('customFoods');
   renderCustomFoods();
+  refreshManualDatalist();
   resetFoodForm();
   setFoodStatus('已保存 ✓', 'ok');
 }
@@ -1555,6 +1674,8 @@ async function loadAllData() {
   settings = loadSettings();
   fillSettingsForm();
   updateRefHint();
+  refreshManualDatalist();
+  renderManualList();
   renderTodayTotals();
   renderTodayMeals();
   renderHistory();
@@ -1648,6 +1769,7 @@ async function handleFoodListClick(event) {
     await idbDelete('customFoods', delBtn.dataset.delFood);
     allCustomFoods = await idbAll('customFoods');
     renderCustomFoods();
+    refreshManualDatalist();
     return;
   }
   const quickBtn = event.target.closest('[data-quick-food]');
@@ -1808,6 +1930,28 @@ function bindEvents() {
   $('#analyzeBtn').addEventListener('click', runAnalysis);
   $('#textAnalyzeBtn').addEventListener('click', runTextAnalysis);
   $('#evaluateBtn').addEventListener('click', runEvaluate);
+
+  $('#manualAddBtn').addEventListener('click', addManualFood);
+  $('#manualClearBtn').addEventListener('click', clearManualList);
+  $('#manualSaveBtn').addEventListener('click', saveManualMeal);
+  $('#manualMealType').addEventListener('change', () => {
+    if (manualFoods.length) {
+      $('#manualSaveBtn').textContent = `✓ 保存为「${$('#manualMealType').value}」记录`;
+    }
+  });
+  $('#manualList').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-manual-del]');
+    if (!button) return;
+    manualFoods.splice(parseInt(button.dataset.manualDel, 10), 1);
+    renderManualList();
+    setManualStatus('', '');
+  });
+  $('#manualName').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addManualFood();
+    }
+  });
 
   $('#todayMeals').addEventListener('click', async (event) => {
     const editBtn = event.target.closest('[data-edit-meal]');

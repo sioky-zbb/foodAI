@@ -80,6 +80,35 @@
         <div id="textStatus" class="status"></div>
       </div>
 
+      <div class="card manual-record-card">
+        <h2>手动记录</h2>
+        <p class="muted">不拍照、不靠 AI：直接填写食物名称和营养数据（可参考包装标签），一次添加多项后保存到当天。</p>
+        <div class="form-grid">
+          <select id="manualMealType">
+            <option value="早餐">早餐</option>
+            <option value="午餐" selected>午餐</option>
+            <option value="晚餐">晚餐</option>
+            <option value="加餐">加餐</option>
+          </select>
+          <input type="text" id="manualName" list="manualFoodDatalist" placeholder="食物名称（必填）" autocomplete="off">
+          <datalist id="manualFoodDatalist"></datalist>
+          <input type="number" id="manualWeight" placeholder="重量 g（如 150）" step="1" min="0" inputmode="numeric">
+          <input type="number" id="manualKcal" placeholder="热量 kcal" step="1" min="0" inputmode="decimal">
+          <input type="number" id="manualProtein" placeholder="蛋白质 g" step="0.1" min="0" inputmode="decimal">
+          <input type="number" id="manualCarbs" placeholder="碳水 g" step="0.1" min="0" inputmode="decimal">
+          <input type="number" id="manualFat" placeholder="脂肪 g" step="0.1" min="0" inputmode="decimal">
+        </div>
+        <div class="btn-row">
+          <button id="manualAddBtn" class="primary-btn">＋ 添加这项</button>
+          <button id="manualClearBtn" class="small-btn">清空列表</button>
+        </div>
+        <div id="manualList"></div>
+        <div class="btn-row">
+          <button id="manualSaveBtn" class="secondary-btn" disabled>✓ 保存这一餐</button>
+        </div>
+        <div id="manualStatus" class="status"></div>
+      </div>
+
       <div class="card leftover-card">
         <h2>饭后剩余核对（可选）</h2>
         <p class="muted">如果没吃完，饭后用同样角度拍剩余的食物，AI 识别后从餐前记录中扣除，只记录实际吃进去的量。</p>
